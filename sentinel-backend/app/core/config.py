@@ -51,9 +51,20 @@ class Settings(BaseSettings):
     ANPR_ENABLED: bool = True
     TRACKING_ENABLED: bool = True
 
-    # Video Settings
+    # Video & Stream Settings
     VIDEO_FRAME_SAMPLE_RATE: int = 5
     VIDEO_MAX_RECONNECT_ATTEMPTS: int = 10
+    CCTV_CATALOG_URL: str = "https://cctv.corp8.cloud/cameras.json"
+    CCTV_HLS_BASE_URL: str = "https://cctv.corp8.cloud"
+    CCTV_RTSP_HOST: str = "103.250.160.189"
+    CCTV_RTSP_PORT: int = 8554
+    CCTV_STREAM_USER: str = ""
+    CCTV_STREAM_PASSWORD: str = ""
+
+    # Supabase Settings (Optional overrides for PostgreSQL)
+    SUPABASE_URL: str = ""
+    SUPABASE_KEY: str = ""
+    SUPABASE_DB_URL: str = ""
 
     # Storage Settings
     STORAGE_TYPE: str = "local"

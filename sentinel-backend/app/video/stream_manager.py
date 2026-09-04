@@ -22,7 +22,7 @@ class StreamManager:
             logger.info(f"Stream for camera {camera_id} is already running.")
             return True
 
-        client = RTSPStreamClient(rtsp_url)
+        client = RTSPStreamClient(stream_url=rtsp_url, camera_id=camera_id)
         if client.connect():
             self.active_streams[camera_id] = client
             self.samplers[camera_id] = FrameSampler()

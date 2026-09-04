@@ -2,9 +2,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List
 from sqlalchemy import String, Float, DateTime, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
-from app.models.base import Base
+from app.models.base import Base, JSONField
 
 
 class Track(Base):
@@ -18,7 +18,7 @@ class Track(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     ended_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     
-    trajectory: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(JSONB, nullable=True) # [{camera_id, lat, lng, timestamp}]
+    trajectory: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(JSONField, nullable=True) # [{camera_id, lat, lng, timestamp}]
     confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
 
 __table_args__ = (

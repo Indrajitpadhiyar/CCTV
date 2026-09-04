@@ -2,9 +2,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 from sqlalchemy import String, DateTime, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
-from app.models.base import Base
+from app.models.base import Base, JSONField
 
 
 class Alert(Base):
@@ -20,7 +20,7 @@ class Alert(Base):
 
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
-    extra_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column("metadata", JSONB, nullable=True)
+    extra_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column("metadata", JSONField, nullable=True)
 
     acknowledged_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

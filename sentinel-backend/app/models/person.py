@@ -2,9 +2,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 from sqlalchemy import String, Float, DateTime, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
-from app.models.base import Base
+from app.models.base import Base, JSONField
 
 
 class Person(Base):
@@ -16,7 +16,7 @@ class Person(Base):
     track_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
     confidence: Mapped[float] = mapped_column(Float, nullable=False)
     embedding_reference: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    attributes: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True) # gender, upper_color, lower_color, hat, glasses
+    attributes: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONField, nullable=True) # gender, upper_color, lower_color, hat, glasses
 
 __table_args__ = (
     Index("ix_persons_camera_timestamp", "camera_id", "timestamp"),

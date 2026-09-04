@@ -21,6 +21,7 @@ class CameraService:
 
         camera = Camera(**payload.model_dump())
         created = await self.camera_repo.create(camera)
+        await self.camera_repo.session.commit()
         
         await EventPublisher.publish(
             EventType.CAMERA_STATUS,

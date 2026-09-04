@@ -7,11 +7,22 @@ from app.core.database import get_db
 from app.schemas.camera import CameraCreate, CameraUpdate, CameraRead, CameraGISMapPoint, CameraStats
 from app.schemas.response import StandardResponse, PaginatedResponse
 from app.services.camera_service import CameraService
+from app.services.catalog_service import CatalogService
 from app.utils.pagination import paginate
 from app.api.deps import require_role
 from app.models.user import User
 
 router = APIRouter(prefix="/cameras", tags=["Cameras"])
+
+
+@router.post("/sync-catalog", response_model=StandardResponse[List[CameraRead]])
+async def sync_camera_catalog(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("ADMIN", "OPERATOR"))
+):
+    catalog_service = CatalogService(db)
+    cameras = await catalog_service.sync_catalog()
+    return StandardResponse(data=cameras, message=f"Successfully synchronized {len(cameras)} cameras from live catalog.")
 
 
 @router.post("", response_model=StandardResponse[CameraRead], status_code=status.HTTP_201_CREATED)

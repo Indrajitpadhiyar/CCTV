@@ -13,7 +13,9 @@ class StreamService:
 
     async def create_stream(self, payload: StreamCreate) -> Stream:
         stream = Stream(**payload.model_dump())
-        return await self.stream_repo.create(stream)
+        created = await self.stream_repo.create(stream)
+        await self.stream_repo.session.commit()
+        return created
 
     async def get_by_id(self, stream_id: uuid.UUID) -> Stream:
         stream = await self.stream_repo.get_by_id(stream_id)

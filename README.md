@@ -34,11 +34,56 @@ An enterprise-grade, high-performance distributed AI CCTV surveillance platform 
 
 Sentinel AI CCTV Platform connects heterogeneous RTSP video streams and processes frames using distributed background workers and AI inference pipelines:
 
-- **Stream Management**: Register, start, stop, restart, and sample RTSP video feeds dynamically.
+- **Stream Management**: Register, start, stop, restart, and sample RTSP/HLS video feeds dynamically.
+- **Dynamic Catalogue Sync**: Auto-fetch cameras from `https://cctv.corp8.cloud/cameras.json` (`cam01`...`cam30`).
+- **Protocol Support**: RTSP over TCP (`rtsp_transport;tcp`), HLS fallback (`.m3u8`), WebRTC (WHEP).
+- **PTS Monotonic Timing**: Timestamps derived strictly from `CAP_PROP_POS_MSEC` (never `CAP_PROP_FPS`).
+- **Resilient Stream Client**: Exponential backoff reconnection (2s to 30s cap), inter-frame gap tolerance, join-time decoder warning tolerance, and scene loop cut discontinuity recovery.
 - **AI Analytics Engine**: Pluggable architecture supporting YOLOv8 Object Detection, ANPR plate recognition, DeepSORT tracking, and Person Re-ID.
-- **Real-time Alerting**: Automated matching against watchlists with WebSocket alert broadcasting.
-- **Vehicle Tracking**: Multi-camera vehicle trajectory timeline and GIS map visualization.
-- **Forensic Search**: Advanced search across cameras, license plates, persons, and events.
+- **Real-time Alerting**: Automated matching against watchlists with WebSocket alert broadcasting via Redis Pub/Sub.
+- **Vehicle Tracking & GIS**: Multi-camera vehicle trajectory timeline and GIS map visualization.
+- **Database & Cache**: Supabase PostgreSQL database + Redis caching & Celery task broker.
+
+---
+
+## Live CCTV Stream Connection Specifications
+
+### Protocols & Endpoints
+
+| Protocol | Endpoint Template | Access | Intended For |
+|---|---|---|---|
+| **HLS** | `https://cctv.corp8.cloud/<id>/index.m3u8` | Public / Session | Dashboards, Mobile, Remote AI |
+| **RTSP** | `rtsp://<email>:<password>@103.250.160.189:8554/stream/<id>` | Direct Public IP | AI Inference (OpenCV / FFmpeg) |
+| **WebRTC (WHEP)** | `http://<email>:<password>@103.250.160.189:8889/stream/<id>/whep` | Direct Public IP | Low-Latency Browser Preview |
+
+### 7-Point Pre-Submission Checklist Compliance
+
+1. **RTSP forced over TCP**: Sets `OPENCV_FFMPEG_CAPTURE_OPTIONS=rtsp_transport;tcp` to eliminate UDP corrupt frame artifacts across NAT/firewalls. HLS fallback is enabled if RTSP port 8554 is unreachable.
+2. **PTS Monotonic Timing**: Drives timing from Presentation Timestamps (`CAP_PROP_POS_MSEC`), ignoring `CAP_PROP_FPS` or arrival time jitter.
+3. **Inter-frame Gap Tolerance**: Handles variable frame rates gracefully without crashing or false disconnect triggers.
+4. **Exponential Backoff Reconnects**: Reconnection logic uses exponential backoff (`2s -> 4s -> 8s -> ... -> 30s max cap`) with non-tight-loop delay.
+5. **Non-fatal Decoder Warnings**: Join-time warnings (e.g. `Could not find ref with POC until first IDR`) are logged without aborting decoding.
+6. **Dynamic Catalogue Fetching**: Reads camera catalogue dynamically from `https://cctv.corp8.cloud/cameras.json` via `/api/v1/cameras/sync-catalog`.
+7. **Scene Cut Discontinuity Recovery**: Detects loop point jumps (`PTS` reset / backward jump) and resets tracking state to prevent tracking ghosts across cuts.
+
+---
+
+## Database Configuration (Supabase PostgreSQL + Redis)
+
+Sentinel supports local PostgreSQL or cloud-hosted **Supabase PostgreSQL** alongside **Redis**:
+
+### Supabase Connection Setup
+In your `sentinel-backend/.env`:
+```env
+# Supabase PostgreSQL Connection String
+DATABASE_URL=postgresql+asyncpg://postgres:<YOUR_SUPABASE_PASSWORD>@db.<YOUR_PROJECT_REF>.supabase.co:5432/postgres
+DATABASE_URL_SYNC=postgresql://postgres:<YOUR_SUPABASE_PASSWORD>@db.<YOUR_PROJECT_REF>.supabase.co:5432/postgres
+
+# Redis Connection (Local or Upstash Redis)
+REDIS_URL=redis://localhost:6379/0
+CELERY_BROKER_URL=redis://localhost:6379/1
+CELERY_RESULT_BACKEND=redis://localhost:6379/2
+```
 
 ---
 

@@ -1,9 +1,11 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Any
-from sqlalchemy import DateTime, MetaData
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, MetaData, JSON
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+JSONField = JSONB().with_variant(JSON, "sqlite")
 
 # Standard naming convention for indexes and constraints
 POSTGRES_INDEXES_NAMING_CONVENTION = {
