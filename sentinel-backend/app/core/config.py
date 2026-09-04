@@ -61,10 +61,13 @@ class Settings(BaseSettings):
     CCTV_STREAM_USER: str = ""
     CCTV_STREAM_PASSWORD: str = ""
 
-    # Supabase Settings (Optional overrides for PostgreSQL)
+    # Supabase / Neon Settings (Optional overrides for PostgreSQL)
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
     SUPABASE_DB_URL: str = ""
+    NEON_API_URL: str = "https://ep-super-boat-aeh9ii1j.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1"
+    NEON_AUTH_URL: str = "https://ep-super-boat-aeh9ii1j.neonauth.c-2.us-east-2.aws.neon.tech/neondb/auth"
+    NEON_JWKS_URL: str = "https://ep-super-boat-aeh9ii1j.neonauth.c-2.us-east-2.aws.neon.tech/neondb/auth/.well-known/jwks.json"
 
     # Storage Settings
     STORAGE_TYPE: str = "local"
