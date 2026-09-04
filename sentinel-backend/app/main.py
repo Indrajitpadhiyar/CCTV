@@ -29,15 +29,16 @@ app = FastAPI(
 )
 
 # Add Middleware
-app.add_middleware(RequestLoggingMiddleware)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else [settings.CORS_ORIGINS],
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(RequestLoggingMiddleware)
 
 
 @app.exception_handler(SentinelException)
