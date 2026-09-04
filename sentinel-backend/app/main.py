@@ -41,10 +41,30 @@ app.add_middleware(
 app.add_middleware(RequestLoggingMiddleware)
 
 
+@app.middleware("http")
+async def ensure_cors_headers(request: Request, call_next):
+    """Ensure CORS headers are attached to every response, even on errors."""
+    if request.method == "OPTIONS":
+        return Response(
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Headers": "*",
+            }
+        )
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
+
 @app.exception_handler(SentinelException)
 async def sentinel_exception_handler(request: Request, exc: SentinelException):
     return JSONResponse(
         status_code=exc.status_code,
+        headers={"Access-Control-Allow-Origin": "*"},
         content={
             "success": False,
             "error": {
@@ -61,6 +81,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.exception(f"Unhandled server error: {exc}")
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        headers={"Access-Control-Allow-Origin": "*"},
         content={
             "success": False,
             "error": {

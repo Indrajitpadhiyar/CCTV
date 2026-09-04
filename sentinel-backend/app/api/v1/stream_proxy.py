@@ -43,6 +43,7 @@ async def proxy_hls_stream(
             
             return Response(
                 content=res.content,
+                status_code=res.status_code,
                 media_type=content_type,
                 headers={
                     "Access-Control-Allow-Origin": "*",
@@ -50,8 +51,14 @@ async def proxy_hls_stream(
                     "Cache-Control": "no-cache",
                 }
             )
-        except HTTPException:
-            raise
         except Exception as e:
-            logger.error(f"Error proxying stream for {camera_code}/{file_name}: {e}")
-            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Stream proxy error: {str(e)}")
+            logger.warning(f"Stream proxy connection error for {camera_code}/{file_name}: {e}")
+            return Response(
+                content=b'{"status": "offline", "message": "Stream feed proxying fallback"}',
+                status_code=502,
+                media_type="application/json",
+                headers={
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, OPTIONS",
+                }
+            )
