@@ -29,7 +29,7 @@ export default function HLSPlayer({ streamUrl, cameraCode, isOnline = true }) {
           setHasError(false);
         });
         hls.on(Hls.Events.ERROR, (event, data) => {
-          if (data.fatal) {
+          if (data.fatal || (data.response && data.response.code === 401)) {
             setHasError(true);
           }
         });
