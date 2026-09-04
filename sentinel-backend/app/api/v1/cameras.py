@@ -18,7 +18,7 @@ router = APIRouter(prefix="/cameras", tags=["Cameras"])
 @router.post("/sync-catalog", response_model=StandardResponse[List[CameraRead]])
 async def sync_camera_catalog(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("ADMIN", "OPERATOR"))
+    current_user: Optional[User] = Depends(require_role("ADMIN", "OPERATOR", allow_guest=True))
 ):
     catalog_service = CatalogService(db)
     cameras = await catalog_service.sync_catalog()
@@ -47,7 +47,7 @@ async def list_cameras(
     protocol: Optional[str] = None,
     search: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("ADMIN", "OPERATOR", "INVESTIGATOR", "VIEWER"))
+    current_user: Optional[User] = Depends(require_role("ADMIN", "OPERATOR", "INVESTIGATOR", "VIEWER", allow_guest=True))
 ):
     service = CameraService(db)
     cameras, total = await service.list_cameras(
