@@ -70,6 +70,15 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+from fastapi.responses import RedirectResponse
+
+
+@app.get("/", include_in_schema=False)
+async def root_redirect():
+    """Redirect root path to interactive Swagger documentation."""
+    return RedirectResponse(url="/docs")
+
+
 @app.get("/health", tags=["Health Checks"])
 async def root_health_check():
     """Top-level health check endpoint."""
