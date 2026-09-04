@@ -18,12 +18,15 @@ from app.api.v1.locations import router as locations_router
 from app.api.v1.health import router as health_router
 from app.api.v1.websocket import router as ws_router
 
+from app.api.v1.stream_proxy import router as stream_proxy_router
+
 api_v1_router = APIRouter(prefix="/api/v1")
 
 api_v1_router.include_router(auth_router)
 api_v1_router.include_router(users_router)
 api_v1_router.include_router(cameras_router)
 api_v1_router.include_router(streams_router)
+api_v1_router.include_router(stream_proxy_router)
 api_v1_router.include_router(detections_router)
 api_v1_router.include_router(vehicles_router)
 api_v1_router.include_router(persons_router)

@@ -6,7 +6,7 @@ export default function CameraCard({ camera, userEmail, userPassword, onOpenModa
   const cameraCode = (camera.camera_code || camera.id || 'cam01').toLowerCase();
   const cameraName = camera.name || `Camera ${cameraCode.toUpperCase()}`;
   const isOnline = camera.status !== 'offline';
-  const hlsUrl = `https://cctv.corp8.cloud/${cameraCode}/index.m3u8`;
+  const hlsUrl = `http://localhost:8000/api/v1/stream-proxy/${cameraCode}/index.m3u8`;
 
   return (
     <div className="flex flex-col bg-gray-900 border border-gray-800 hover:border-indigo-500/50 rounded-xl overflow-hidden shadow-lg transition-all duration-300 group">
