@@ -1,0 +1,30 @@
+# Environment variables
+.env
+backend/.env
+
+# Python bytecode & cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Agent / IDE temporary scratch & brain files
+antigravity-ide/
+.gemini/
+
+# Models & weight files
+backend/models/
+*.pt
+*.onnx
+*.caffemodel
+*.prototxt
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# IDE configurations
+.vscode/
+.idea/
+.DS_Store
