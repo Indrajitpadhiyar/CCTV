@@ -19,7 +19,7 @@ def main():
     parser.add_argument(
         "--camera",
         type=str,
-        default="cam01",
+        default="cam17",
         help="Camera code to stream (e.g. cam01, cam04, cam15, cam30). Default: cam03"
     )
     parser.add_argument(
