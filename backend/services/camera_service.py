@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 # Ensure backend root is on sys.path
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BACKEND_DIR not in sys.path:
@@ -8,7 +9,6 @@ if BACKEND_DIR not in sys.path:
 
 import time
 import cv2
-
 import config
 from core.stream_reader import StreamReader
 from core.hud_renderer import HUDRenderer
