@@ -42,3 +42,25 @@ MIN_RECONNECT_SEC = 2.0
 MAX_RECONNECT_SEC = 30.0
 BACKOFF_FACTOR = 2.0
 WINDOW_TITLE = f"Sentinel CCTV — Live Feed [{CAMERA_CODE.upper()}]"
+
+# Full-frame real-time enhancement. CPU-safe defaults; optional SR requires a local model.
+ENHANCEMENT_PROFILE = os.getenv("ENHANCEMENT_PROFILE", "BALANCED").upper()
+ENABLE_ENHANCEMENT = os.getenv("ENABLE_ENHANCEMENT", "true").lower() == "true"
+ENABLE_LOW_LIGHT = os.getenv("ENABLE_LOW_LIGHT", "true").lower() == "true"
+ENABLE_DENOISE = os.getenv("ENABLE_DENOISE", "true").lower() == "true"
+ENABLE_SUPER_RESOLUTION = os.getenv("ENABLE_SUPER_RESOLUTION", "false").lower() == "true"
+ENABLE_SHARPEN = os.getenv("ENABLE_SHARPEN", "true").lower() == "true"
+ENABLE_COLOR_CORRECTION = os.getenv("ENABLE_COLOR_CORRECTION", "true").lower() == "true"
+ENABLE_TEMPORAL_STABILITY = os.getenv("ENABLE_TEMPORAL_STABILITY", "true").lower() == "true"
+ENHANCEMENT_STRENGTH = float(os.getenv("ENHANCEMENT_STRENGTH", "0.45"))
+SUPER_RESOLUTION_MODEL = os.getenv(
+	"SUPER_RESOLUTION_MODEL",
+	os.path.join(os.path.dirname(__file__), "models", "EDSR_x2.pb")
+)
+SUPER_RESOLUTION_MODEL_NAME = os.getenv("SUPER_RESOLUTION_MODEL_NAME", "edsr")
+SUPER_RESOLUTION_SCALE = int(os.getenv("SUPER_RESOLUTION_SCALE", "2"))
+# Recognition stays on the camera frame by default to preserve existing SFace behavior.
+FACE_ANALYSIS_ON_ENHANCED = os.getenv("FACE_ANALYSIS_ON_ENHANCED", "false").lower() == "true"
+TARGET_ZOOM_DEFAULT = float(os.getenv("TARGET_ZOOM_DEFAULT", "2.0"))
+MAX_PROCESSING_FPS = float(os.getenv("MAX_PROCESSING_FPS", "30"))
+ENHANCEMENT_MAX_WIDTH = int(os.getenv("ENHANCEMENT_MAX_WIDTH", "1280"))

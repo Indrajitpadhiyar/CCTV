@@ -14,7 +14,10 @@ class HUDRenderer:
         faces: Optional[List[Dict[str, Any]]] = None,
         face_analysis_active: bool = True,
         target_loaded: bool = False,
-        target_name: str = ""
+        target_name: str = "",
+        enhancement_metrics: Optional[Dict[str, Any]] = None,
+        display_fps: float = 0.0,
+        target_zoom: float = 1.0
     ) -> np.ndarray:
         h, w, _ = frame.shape
 
@@ -70,9 +73,19 @@ class HUDRenderer:
         else:
             cv2.putText(frame, "FACE AI: OFF (Press 'f')", (w - 410, 42), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (120, 130, 150), 1, cv2.LINE_AA)
 
+        if enhancement_metrics:
+            enhancement_status = enhancement_metrics.get("status", "OFF")
+            enhancement_color = (0, 230, 118) if enhancement_status == "ON" else (150, 160, 170)
+            enhancement_text = (
+                f"ENH: {enhancement_status} | FPS: {display_fps:.1f} | "
+                f"LAT: {enhancement_metrics.get('latency_ms', 0.0):.0f}ms | "
+                f"ZOOM: {target_zoom:.1f}x"
+            )
+            cv2.putText(frame, enhancement_text, (12, 72), cv2.FONT_HERSHEY_SIMPLEX, 0.45, enhancement_color, 1, cv2.LINE_AA)
+
         # Bottom Information Bar
         cv2.rectangle(frame, (0, h - 30), (w, h), (10, 15, 26), -1)
-        info_text = f"Res: {w}x{h} | 'm': Match-Only Mode | 't': Toggle Target Match | 'f': Toggle Face AI | 's': Snapshot | 'q'/ESC: Exit"
+        info_text = f"Res: {w}x{h} | E Enhance | D Denoise | L Low-light | R SR | K Sharpen | C Color | Y Temporal | Z Zoom | [ ] Strength | S Snapshot | Q Exit"
         cv2.putText(frame, info_text, (10, h - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.40, (180, 190, 200), 1, cv2.LINE_AA)
 
         return frame

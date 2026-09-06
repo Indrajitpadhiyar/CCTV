@@ -87,6 +87,25 @@ def main():
         action="store_false",
         help="Disable face detection analytics overlay"
     )
+    parser.add_argument(
+        "--no-enhancement",
+        dest="enhancement_enabled",
+        action="store_false",
+        default=None,
+        help="Disable full-frame enhancement while preserving the original processing path"
+    )
+    parser.add_argument(
+        "--profile",
+        choices=("performance", "balanced", "quality"),
+        default=None,
+        help="Enhancement profile; default comes from config or BALANCED"
+    )
+    parser.add_argument(
+        "--enhancement-strength",
+        type=float,
+        default=None,
+        help="Enhancement strength from 0.0 to 1.0"
+    )
     args = parser.parse_args()
 
     video_file_path = None
@@ -112,6 +131,9 @@ def main():
     print(" Controls:")
     print("   - Press 'm' to toggle Match-Only Mode on/off")
     print("   - Press 't' to toggle Target Photo Matching on/off")
+    print("   - Press 'z' to zoom matched target people; use '+'/'-' to adjust zoom")
+    print("   - Press 'e' enhancement, 'd' denoise, 'l' low-light, 'r' SR, 'k' sharpen")
+    print("   - Press 'c' color, 'y' temporal, '['/']' enhancement strength")
     print("   - Press 'f' to toggle Face AI overlay on/off")
     print("   - Press 's' to save snapshot image to backend/snapshots/")
     print("   - Press 'q' or ESC in video window to exit")
@@ -124,7 +146,10 @@ def main():
             video_path=video_file_path,
             target_path=target_photo_path,
             match_only=args.match_only,
-            analyze_faces=args.analyze_faces
+            analyze_faces=args.analyze_faces,
+            enhancement_enabled=args.enhancement_enabled,
+            enhancement_profile=args.profile,
+            enhancement_strength=args.enhancement_strength
         )
         service.run()
     except KeyboardInterrupt:
