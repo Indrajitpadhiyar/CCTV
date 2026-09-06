@@ -1,19 +1,22 @@
-# Sentinel CCTV — Professional Live Camera & Real-Time Face AI Monitor
+# Sentinel CCTV — Professional Live Camera & Real-Time Face AI Platform
 
-A robust, production-grade Python solution for streaming, analyzing, and monitoring live CCTV feeds (`cam01`–`cam30`) in real time using OpenCV and Deep Learning Face Detection AI (YuNet ONNX Engine).
+A robust, production-grade Python solution for live CCTV camera streaming (`cam01`–`cam30`), real-time face detection, and deep learning **Target Photo Face Recognition & Matching** using OpenCV (YuNet ONNX Detector & SFace 128-d Feature Embedding Recognizer).
 
 ---
 
 ## 🌟 Key Features
 
-- **YuNet Deep Learning AI Engine**: Utilizes OpenCV YuNet ONNX neural model with a 1.5x upscaling pass and aspect ratio filtering tailored for small faces in outdoor CCTV streams.
+- **YuNet Deep Learning Detection Engine**: Utilizes OpenCV YuNet ONNX neural model with multi-scale upscaling passes and aspect ratio filtering for accurate face detection across CCTV feeds and local test videos.
+- **SFace Deep Learning Face Recognition (128-d Embeddings)**: Computes 128-dimensional feature vectors to match live faces against target reference photos (`--target`) using cosine similarity scoring (75%–99% match accuracy).
+- **"TARGET FACE NOT FOUND" Visual Alerts**: Automatically displays clear HUD status badges and on-screen alert banners (`[!] TARGET FACE NOT FOUND`) when a target face is absent from the feed, labeling non-matching faces as `NO MATCH`.
+- **Match-Only Display Mode (`-m` / `--match-only`)**: Option to hide all non-matching individuals/strangers and track **ONLY** the target matched person on screen.
+- **Offline Video Testing (`-v` / `--video`)**: Run face detection and recognition on local `.mp4`, `.avi`, `.mov` test videos with native FPS synchronization and automatic file detection in `backend/video/`.
 - **Facial Landmark Estimation**: Detects and highlights 5 key facial landmarks (right eye, left eye, nose, right mouth, left mouth).
-- **Persistent Centroid Tracking**: Assigns stable, persistent IDs (`FACE #01`, `FACE #02`) and tracks individuals across frames even with temporary occlusions.
-- **Proximity & Confidence Metrics**: Automatically calculates real-time confidence scores (72%–98%) and distance proximity (`CLOSE`, `MID`, `FAR`).
-- **RTSP/TCP Transport & HLS Fallback**: Forces `rtsp_transport;tcp` via OpenCV FFmpeg options to prevent UDP packet loss, with automatic failover to CDN HLS stream (`.m3u8`).
-- **Sci-Fi Head-Up Display (HUD)**: Displays real-time Presentation Timestamps (PTS in ms), camera status indicator (LIVE / RECONNECTING), face count, and targeting reticles.
-- **Instant Snapshot Saver**: Save high-resolution timestamped frame snapshots with bounding box and landmark overlays directly to `backend/snapshots/`.
-- **Resilient Exponential Backoff**: Displays a clean reconnecting screen with live retry timers if the network drops.
+- **Persistent Centroid Tracking**: Assigns stable, persistent face IDs (`FACE #01`, `FACE #02`) and tracks individuals across frames.
+- **RTSP/TCP Transport & HLS Fallback**: Forces `rtsp_transport;tcp` via OpenCV FFmpeg options to eliminate packet loss, with automatic CDN HLS fallback (`.m3u8`).
+- **Sci-Fi Head-Up Display (HUD)**: Displays presentation timestamps (PTS), status indicators (LIVE / RECONNECTING), target match counters, and tech UI reticles.
+- **Instant Snapshot Saver**: Save high-resolution timestamped frame snapshots with bounding box and match badges directly to `backend/snapshots/`.
+- **Automatic Fallbacks**: Includes Haar Cascade detector fallback for 100% offline detection availability.
 
 ---
 
@@ -27,14 +30,19 @@ A robust, production-grade Python solution for streaming, analyzing, and monitor
 │   ├── config.py                # Environment configuration & RTSP URL generator
 │   ├── requirements.txt         # Python dependency requirements
 │   ├── core/
-│   │   ├── face_analyzer.py     # YuNet ONNX Face AI Detector & Centroid Tracker
-│   │   ├── hud_renderer.py      # Sci-fi HUD overlay & facial reticle graphics
-│   │   └── stream_reader.py     # OpenCV VideoCapture manager for RTSP/HLS
+│   │   ├── face_analyzer.py     # YuNet Detector, SFace Recognizer & Centroid Tracker
+│   │   ├── hud_renderer.py      # Sci-fi HUD overlay & target match graphics
+│   │   └── stream_reader.py     # OpenCV VideoCapture manager for RTSP/HLS/Video
 │   ├── services/
 │   │   └── camera_service.py    # Main camera playback loop & snapshot controller
+│   ├── models/                  # Downloaded ONNX neural model files (YuNet, SFace)
+│   ├── targets/                 # Target reference photos for face matching
+│   ├── image/                   # Additional reference images (e.g. kig.png)
+│   ├── video/                   # Local video files for testing
+│   ├── snapshots/               # Saved snapshot outputs
 │   └── utils/
 │       └── logger.py            # Formatted log outputs
-├── .gitignore                   # Ignores .env, pycache, models, and temp files
+├── .gitignore                   # Ignores models, virtualenvs, snapshots, and temp files
 └── README.md                    # Project documentation
 ```
 
@@ -42,7 +50,7 @@ A robust, production-grade Python solution for streaming, analyzing, and monitor
 
 ## 🚀 Quick Start
 
-### 1. Prerequisites & Installation
+### 1. Installation
 
 Ensure Python 3.10+ is installed on your system.
 
@@ -54,19 +62,7 @@ cd backend
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment (Optional)
-
-Create a `backend/.env` file if you wish to override defaults:
-
-```env
-CAMERA_CODE=cam17
-CCTV_STREAM_USER=your_email@domain.com
-CCTV_STREAM_PASSWORD=your_password
-CCTV_RTSP_HOST=103.250.160.189
-CCTV_RTSP_PORT=8554
-```
-
-### 3. Run Live Camera Stream & Face AI
+### 2. Live Camera Stream & Face AI
 
 ```bash
 # Run default camera (cam17) with Face AI enabled
@@ -77,28 +73,56 @@ python main.py --camera cam04
 
 # Run with custom RTSP URL
 python main.py --rtsp-url "rtsp://user:pass@host:port/stream/cam01"
+```
 
-# Run camera stream without Face AI overlay
-python main.py --camera cam04 --no-faces
+---
+
+## 🎯 Target Photo Face Matching
+
+Place any target reference photo(s) in `backend/targets/` or `backend/image/` (e.g., `kig.png`, `john.jpg`).
+
+```bash
+# 1. Run Target Photo Matching on live camera stream
+python main.py --target "image/kig.png"
+
+# 2. Run Target Photo Matching on a local test video
+python main.py --video --target "image/kig.png"
+
+# 3. Run in Match-Only Mode (hides non-matching faces, tracks ONLY the target)
+python main.py --video --target "image/kig.png" --match-only
+```
+
+---
+
+## 🎥 Local Video File Testing
+
+```bash
+# Auto-detect and play test video from backend/video/ folder
+python main.py --video
+
+# Specify a custom video file path
+python main.py --video "video/WhatsApp Video 2026-01-31 at 9.24.24 PM.mp4"
 ```
 
 ---
 
 ## 🎮 Live GUI Keyboard Controls
 
-While the video stream window is focused:
+While the video window is focused:
 
 | Key | Action |
 |---|---|
-| **`f`** | Toggle Deep Face AI overlay ON / OFF |
+| **`m`** | Toggle **Match-Only Mode** (Only target face tracked vs All faces tracked) |
+| **`t`** | Toggle **Target Photo Matching** ON / OFF |
+| **`f`** | Toggle **Deep Face AI Overlay** ON / OFF |
 | **`s`** | Save timestamped frame snapshot to `backend/snapshots/` |
-| **`q`** or **`ESC`** | Cleanly exit viewer window |
+| **`q`** / **`ESC`** | Cleanly exit viewer window |
 
 ---
 
 ## 🛠️ Tech Stack & Dependencies
 
-- **OpenCV (`opencv-python`)**: Video stream ingestion, YuNet ONNX inference, graphics rendering.
-- **NumPy**: Matrix math for centroid tracking and Euclidean distance computation.
-- **python-dotenv**: Environment variable parsing.
-- **httpx**: HTTP requests & stream utility operations.
+- **OpenCV (`opencv-python`)**: Video stream ingestion, YuNet ONNX detection, SFace ONNX face recognition, graphics HUD rendering.
+- **NumPy**: Matrix operations for centroid tracking and cosine distance vector computation.
+- **python-dotenv**: Environment configuration loading.
+- **httpx**: HTTP operations & API utilities.
