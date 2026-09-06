@@ -100,60 +100,221 @@ class CentroidTracker:
 
 class FaceAnalyzer:
     """
-    High-Precision Real-Time Face AI Engine for CCTV Streams.
-    Uses OpenCV YuNet Deep Learning ONNX model with clean 1.5x scale pass & landmark verification
-    calibrated for wide-angle CCTV feeds (eliminating clutter on bikes, cars, wheels, billboards).
+    High-Precision Real-Time Face AI & Target Photo Matching Engine.
+    Uses OpenCV YuNet Deep Learning ONNX model for detection and SFace ONNX model for 128-d deep feature matching.
     """
 
     YUNET_MODEL_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
+    SFACE_MODEL_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx"
 
-    def __init__(self, score_threshold: float = 0.05, min_size: Tuple[int, int] = (8, 10)):
+    def __init__(self, score_threshold: float = 0.35, min_size: Tuple[int, int] = (15, 15), match_threshold: float = 0.363):
         self.score_threshold = score_threshold
         self.min_size = min_size
-        self.tracker = CentroidTracker(max_disappeared=10, max_distance=50.0)
+        self.match_threshold = match_threshold
+        self.tracker = CentroidTracker(max_disappeared=15, max_distance=60.0)
 
-        # Initialize YuNet Deep Learning Detector
+        # Initialize YuNet & SFace Models
         self.yunet_detector = None
+        self.sface_recognizer = None
         self.input_size = (960, 540)
-        self._init_yunet()
+        
+        self.target_features = []  # List of dicts: {"name": str, "feature": np.ndarray}
+        self.target_matching_enabled = True
+        self.match_only_mode = False  # If True, ONLY matched faces are tracked & displayed
 
-    def _init_yunet(self):
-        """Downloads and initializes OpenCV YuNet ONNX deep learning face detector."""
+        self._init_models()
+
+        # Haar Cascade Fallback Classifier
+        try:
+            cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+            self.haar_cascade = cv2.CascadeClassifier(cascade_path)
+        except Exception as e:
+            logger.warning(f"Haar Cascade fallback unavailable: {e}")
+            self.haar_cascade = None
+
+    def _init_models(self):
+        """Downloads and initializes OpenCV YuNet face detector and SFace recognizer models."""
         try:
             backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             model_dir = os.path.join(backend_dir, "models")
             os.makedirs(model_dir, exist_ok=True)
 
-            model_path = os.path.join(model_dir, "face_detection_yunet_2023mar.onnx")
+            yunet_path = os.path.join(model_dir, "face_detection_yunet_2023mar.onnx")
+            sface_path = os.path.join(model_dir, "face_recognition_sface_2021dec.onnx")
 
-            if not os.path.exists(model_path) or os.path.getsize(model_path) < 10000:
-                logger.info(f"Downloading YuNet ONNX Deep Learning Face Model to {model_path}...")
-                urllib.request.urlretrieve(self.YUNET_MODEL_URL, model_path)
+            # Download YuNet if missing
+            if not os.path.exists(yunet_path) or os.path.getsize(yunet_path) < 10000:
+                logger.info(f"Downloading YuNet ONNX Face Model to {yunet_path}...")
+                urllib.request.urlretrieve(self.YUNET_MODEL_URL, yunet_path)
                 logger.info("YuNet Model downloaded successfully!")
+
+            # Download SFace if missing
+            if not os.path.exists(sface_path) or os.path.getsize(sface_path) < 10000:
+                logger.info(f"Downloading SFace ONNX Recognition Model to {sface_path}...")
+                urllib.request.urlretrieve(self.SFACE_MODEL_URL, sface_path)
+                logger.info("SFace Model downloaded successfully!")
 
             if hasattr(cv2, "FaceDetectorYN"):
                 self.yunet_detector = cv2.FaceDetectorYN.create(
-                    model_path, "", self.input_size,
+                    yunet_path, "", self.input_size,
                     score_threshold=self.score_threshold, nms_threshold=0.4, top_k=500
                 )
-                logger.info("YuNet CCTV Deep Learning AI Engine initialized successfully!")
-            else:
-                logger.warning("cv2.FaceDetectorYN not available.")
+                logger.info("YuNet Deep Learning Face Detector initialized successfully!")
+            
+            if hasattr(cv2, "FaceRecognizerSF"):
+                self.sface_recognizer = cv2.FaceRecognizerSF.create(sface_path, "")
+                logger.info("SFace Deep Learning Face Recognizer initialized successfully!")
         except Exception as e:
-            logger.error(f"Failed to load YuNet Deep Learning Model: {e}")
-            self.yunet_detector = None
+            logger.error(f"Failed to initialize Face AI Models: {e}")
+
+    def load_target_photos(self, target_path: str = None) -> int:
+        """
+        Loads reference target photos from directory or file and computes 128-d deep feature embeddings.
+        Supports automatic candidate resolution across targets/, image/, workspace, and backend folders.
+        Returns number of targets loaded.
+        """
+        self.target_features.clear()
+        backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        workspace_dir = os.path.dirname(backend_dir)
+
+        image_files = []
+
+        if target_path and target_path.lower() != "auto":
+            candidates = [
+                target_path,
+                os.path.abspath(target_path),
+                os.path.join(backend_dir, target_path),
+                os.path.join(workspace_dir, target_path),
+                os.path.join(backend_dir, "image", target_path),
+                os.path.join(backend_dir, "image", os.path.basename(target_path)),
+                os.path.join(workspace_dir, "image", os.path.basename(target_path)),
+                os.path.join(backend_dir, "targets", os.path.basename(target_path)),
+            ]
+            found_file = None
+            for cand in candidates:
+                if cand and os.path.exists(cand) and os.path.isfile(cand):
+                    found_file = os.path.abspath(cand)
+                    break
+
+            # Fuzzy match if filename slightly differs (e.g. king.png vs kig.png)
+            if not found_file:
+                target_base = os.path.splitext(os.path.basename(target_path))[0].lower()
+                search_dirs = [
+                    os.path.join(backend_dir, "image"),
+                    os.path.join(backend_dir, "targets"),
+                    os.path.join(workspace_dir, "image")
+                ]
+                for sdir in search_dirs:
+                    if os.path.exists(sdir):
+                        for fn in os.listdir(sdir):
+                            fn_stem = os.path.splitext(fn)[0].lower()
+                            if target_base in fn_stem or fn_stem in target_base:
+                                found_file = os.path.join(sdir, fn)
+                                break
+                    if found_file:
+                        break
+
+            if found_file:
+                image_files.append(found_file)
+            elif os.path.exists(target_path) and os.path.isdir(target_path):
+                for fname in os.listdir(target_path):
+                    if fname.lower().endswith((".jpg", ".jpeg", ".png", ".bmp", ".webp")):
+                        image_files.append(os.path.join(target_path, fname))
+            else:
+                logger.error(f"Specified target image not found: {target_path}")
+
+        # Fallback search if auto or no direct file resolved
+        if not image_files:
+            search_folders = [
+                os.path.join(backend_dir, "targets"),
+                os.path.join(backend_dir, "image")
+            ]
+            for folder in search_folders:
+                if os.path.exists(folder):
+                    for fname in os.listdir(folder):
+                        if fname.lower().endswith((".jpg", ".jpeg", ".png", ".bmp", ".webp")):
+                            image_files.append(os.path.join(folder, fname))
+                    if image_files:
+                        break
+
+        if not image_files:
+            logger.info("No target reference photos loaded.")
+            return 0
+
+        for img_path in image_files:
+            try:
+                img = cv2.imread(img_path)
+                if img is None:
+                    continue
+                name = os.path.splitext(os.path.basename(img_path))[0]
+
+                # Extract SFace Deep Feature Vector
+                feat = self.extract_face_feature(img)
+                if feat is not None:
+                    self.target_features.append({
+                        "name": name.upper(),
+                        "feature": feat,
+                        "path": img_path
+                    })
+                    logger.info(f"Target loaded: '{name.upper()}' from {os.path.basename(img_path)}")
+                else:
+                    logger.warning(f"No human face detected in reference target photo: {os.path.basename(img_path)}")
+            except Exception as e:
+                logger.error(f"Failed to process target photo {img_path}: {e}")
+
+        logger.info(f"Total reference target photo(s) active for real-time video matching: {len(self.target_features)}")
+        return len(self.target_features)
+
+    def extract_face_feature(self, img: np.ndarray) -> Optional[np.ndarray]:
+        """Extracts 128-d SFace feature embedding vector from an input image."""
+        if self.yunet_detector is None or self.sface_recognizer is None:
+            return None
+
+        h, w, _ = img.shape
+        self.yunet_detector.setInputSize((w, h))
+        status, raw_faces = self.yunet_detector.detect(img)
+
+        if status and raw_faces is not None and len(raw_faces) > 0:
+            aligned_face = self.sface_recognizer.alignCrop(img, raw_faces[0])
+            feature = self.sface_recognizer.feature(aligned_face)
+            return feature
+        return None
+
+    def match_feature(self, query_feature: np.ndarray) -> Tuple[bool, str, int]:
+        """
+        Compares query face feature vector against loaded target photo features.
+        Returns (is_match, target_name, match_percentage).
+        """
+        if query_feature is None or not self.target_features or self.sface_recognizer is None:
+            return False, "", 0
+
+        best_score = -1.0
+        best_name = ""
+
+        for target in self.target_features:
+            score = self.sface_recognizer.match(target["feature"], query_feature, cv2.FaceRecognizerSF_FR_COSINE)
+            if score > best_score:
+                best_score = score
+                best_name = target["name"]
+
+        if best_score >= self.match_threshold:
+            # Scale cosine similarity (0.363 to 1.0) to display percentage (75% to 99%)
+            display_pct = int(min(99, max(75, 75 + (best_score - 0.363) * (24.0 / 0.637))))
+            return True, best_name, display_pct
+
+        return False, "", 0
 
     def analyze_frame(self, frame: np.ndarray) -> List[Dict[str, Any]]:
         """
-        Detects real human faces in CCTV frame using YuNet Deep Learning ONNX model.
-        Returns list of analyzed face dicts with bboxes, centroids, landmarks, confidence, and proximity.
+        Detects real human faces in frame and performs real-time target photo matching.
+        Returns list of analyzed face dicts with bboxes, centroids, landmarks, confidence, and target match info.
         """
         h, w, _ = frame.shape
         rects = []
         face_details = {}
 
+        # 1. Primary: YuNet Deep Learning Detector & SFace Feature Matcher
         if self.yunet_detector is not None:
-            # 1.5x upscaling pass for small outdoor CCTV faces
             sw, sh = int(w * 1.5), int(h * 1.5)
             if (sw, sh) != self.input_size:
                 self.input_size = (sw, sh)
@@ -163,20 +324,20 @@ class FaceAnalyzer:
             status, raw_faces = self.yunet_detector.detect(resized_15x)
 
             if status and raw_faces is not None and len(raw_faces) > 0:
-                max_w = min(100, w * 0.10)
-                max_h = min(120, h * 0.12)
+                max_w = min(int(w * 0.85), 800)
+                max_h = min(int(h * 0.85), 800)
 
                 for f in raw_faces:
                     fx, fy, fw, fh = f[0:4] / 1.5
                     score = float(f[-1])
 
-                    # 1. Strict Face Size Bounds (Human faces in CCTV are 8px to 100px)
+                    # Face Size Bounds
                     if fw > max_w or fh > max_h or fw < self.min_size[0] or fh < self.min_size[1]:
                         continue
 
-                    # 2. Strict Aspect Ratio Bounds (Human faces 0.55 to 1.25)
+                    # Aspect Ratio Bounds (Human face 0.50 to 1.35)
                     aspect = fw / float(fh) if fh > 0 else 0
-                    if not (0.55 <= aspect <= 1.25):
+                    if not (0.50 <= aspect <= 1.35):
                         continue
 
                     # Ensure coordinates stay within frame
@@ -195,13 +356,47 @@ class FaceAnalyzer:
                         "left_mouth": (int(lmarks[8]), int(lmarks[9]))
                     }
 
-                    # Calibrate neural score (0.05 - 0.25) into display percentage (72% - 98%)
-                    display_conf = int(min(98, max(72, 72 + (score - 0.05) * (26.0 / 0.20))))
+                    display_conf = int(min(99, max(75, int(score * 100))))
+
+                    # Compute SFace Deep Feature & Match against Target Photos
+                    is_match, match_name, match_pct = False, "", 0
+                    if self.sface_recognizer is not None and self.target_features and self.target_matching_enabled:
+                        try:
+                            # Align face using unscaled original frame coordinates
+                            unscaled_f = f.copy()
+                            unscaled_f[0:4] /= 1.5
+                            unscaled_f[4:14] /= 1.5
+                            aligned = self.sface_recognizer.alignCrop(frame, unscaled_f)
+                            frame_feat = self.sface_recognizer.feature(aligned)
+                            is_match, match_name, match_pct = self.match_feature(frame_feat)
+                        except Exception as e:
+                            pass
 
                     face_details[bbox] = {
                         "confidence": display_conf,
-                        "landmarks": landmarks_dict
+                        "landmarks": landmarks_dict,
+                        "is_match": is_match,
+                        "match_name": match_name,
+                        "match_score": match_pct
                     }
+
+        # 2. Fallback: Haar Cascade if no faces found by YuNet
+        if len(rects) == 0 and self.haar_cascade is not None:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gray = cv2.equalizeHist(gray)
+            detected_haar = self.haar_cascade.detectMultiScale(
+                gray, scaleFactor=1.1, minNeighbors=4, minSize=self.min_size
+            )
+            for (fx, fy, fw, fh) in detected_haar:
+                bbox = (int(fx), int(fy), int(fw), int(fh))
+                rects.append(bbox)
+                face_details[bbox] = {
+                    "confidence": 85,
+                    "landmarks": None,
+                    "is_match": False,
+                    "match_name": "",
+                    "match_score": 0
+                }
 
         # Update Centroid Tracker
         tracked_objects = self.tracker.update(rects)
@@ -215,14 +410,16 @@ class FaceAnalyzer:
             face_area = fw * fh
             area_ratio = face_area / float(frame_area)
 
-            if area_ratio > 0.03:
+            if area_ratio > 0.04:
                 proximity = "CLOSE"
             elif area_ratio > 0.008:
                 proximity = "MID"
             else:
                 proximity = "FAR"
 
-            details = face_details.get(bbox, {"confidence": 75, "landmarks": None})
+            details = face_details.get(bbox, {
+                "confidence": 80, "landmarks": None, "is_match": False, "match_name": "", "match_score": 0
+            })
 
             analyzed_faces.append({
                 "id": face_id,
@@ -231,9 +428,17 @@ class FaceAnalyzer:
                 "centroid": data["centroid"],
                 "proximity": proximity,
                 "confidence": details["confidence"],
-                "landmarks": details["landmarks"]
+                "landmarks": details["landmarks"],
+                "is_match": details["is_match"],
+                "match_name": details["match_name"],
+                "match_score": details["match_score"]
             })
 
+        if self.match_only_mode and self.target_features and self.target_matching_enabled:
+            analyzed_faces = [f for f in analyzed_faces if f["is_match"]]
+
         return analyzed_faces
+
+
 
 
