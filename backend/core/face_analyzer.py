@@ -2,7 +2,7 @@ import os
 import urllib.request
 import cv2
 import numpy as np
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Tuple, Any, Optional
 
 from utils.logger import setup_logger
 

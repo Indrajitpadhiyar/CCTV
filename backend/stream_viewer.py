@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import time
 import logging
+import re
 import cv2
 import numpy as np
 
@@ -20,6 +21,10 @@ logging.basicConfig(
     datefmt="%H:%M:%S"
 )
 logger = logging.getLogger("SingleCameraViewer")
+
+
+def _masked_url(url: str) -> str:
+    return re.sub(r"(://)[^/@]+:[^/@]+@", r"\1***:***@", url)
 
 
 class SingleCameraViewer:
@@ -46,7 +51,7 @@ class SingleCameraViewer:
 
     def connect_stream(self):
         """Attempts to open RTSP stream over TCP, falling back to HLS stream if needed."""
-        logger.info(f"Connecting to RTSP stream (TCP): {self.rtsp_url}")
+        logger.info(f"Connecting to RTSP stream (TCP): {_masked_url(self.rtsp_url)}")
         cap = cv2.VideoCapture(self.rtsp_url, cv2.CAP_FFMPEG)
         
         if cap.isOpened():
@@ -57,7 +62,7 @@ class SingleCameraViewer:
                 return cap
             cap.release()
 
-        logger.warning(f"RTSP stream unavailable. Attempting HLS fallback stream: {self.hls_url}")
+        logger.warning(f"RTSP stream unavailable. Attempting HLS fallback stream: {_masked_url(self.hls_url)}")
         cap = cv2.VideoCapture(self.hls_url, cv2.CAP_FFMPEG)
         if cap.isOpened():
             ret, _ = cap.read()

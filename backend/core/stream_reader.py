@@ -7,12 +7,18 @@ if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
 import time
+import re
 import cv2
 
 import config
 from utils.logger import setup_logger
 
 logger = setup_logger("StreamReader")
+
+
+def _masked_url(url: str) -> str:
+    """Hide user credentials before a stream URL reaches logs."""
+    return re.sub(r"(://)[^/@]+:[^/@]+@", r"\1***:***@", url)
 
 class StreamReader:
     """Manages OpenCV VideoCapture connection and frame decoding for RTSP/HLS streams."""
@@ -51,7 +57,7 @@ class StreamReader:
             else:
                 logger.error(f"Video file not found at path: {self.video_path}")
 
-        logger.info(f"Connecting to RTSP feed (TCP): {self.rtsp_url}")
+        logger.info(f"Connecting to RTSP feed (TCP): {_masked_url(self.rtsp_url)}")
         self.cap = cv2.VideoCapture(self.rtsp_url, cv2.CAP_FFMPEG)
 
         if self.cap.isOpened():
@@ -61,7 +67,7 @@ class StreamReader:
                 return True
             self.cap.release()
 
-        logger.warning(f"RTSP feed unreachable. Trying HLS fallback: {self.hls_url}")
+        logger.warning(f"RTSP feed unreachable. Trying HLS fallback: {_masked_url(self.hls_url)}")
         self.cap = cv2.VideoCapture(self.hls_url, cv2.CAP_FFMPEG)
         if self.cap.isOpened():
             ret, frame = self.cap.read()
