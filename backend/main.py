@@ -53,12 +53,18 @@ def main():
         help="Custom RTSP URL override"
     )
     parser.add_argument(
+        "-a", "--all-videos",
+        action="store_true",
+        default=False,
+        help="Analyze all local video files in backend/video/ simultaneously and pop up footage when target is spotted"
+    )
+    parser.add_argument(
         "-v", "--video",
         type=str,
         nargs="?",
         const="auto",
         default=None,
-        help="Path to local video file for offline face detection testing. Use '--video' to auto-detect video in backend/video/"
+        help="Path to local video file for offline face detection testing. Use '--video all' or '-a' to analyze all videos in parallel"
     )
     parser.add_argument(
         "-t", "--target",
@@ -108,14 +114,20 @@ def main():
     )
     args = parser.parse_args()
 
+    target_photo_path = args.target if args.target != "auto" else os.path.join(BACKEND_DIR, "targets")
+
+    if args.all_videos or (args.video and args.video.lower() in ("all", "*")):
+        from services.multi_video_service import MultiVideoService
+        multi_service = MultiVideoService(target_path=target_photo_path)
+        multi_service.run()
+        return
+
     video_file_path = None
     if args.video is not None:
         video_file_path = find_test_video(args.video)
         if not video_file_path:
             logger.error("No valid video file found for testing. Exiting...")
             sys.exit(1)
-
-    target_photo_path = args.target if args.target != "auto" else os.path.join(BACKEND_DIR, "targets")
 
     print("=" * 70)
     print("      SENTINEL CCTV PLATFORM — LIVE FOOTAGE & FACE AI MONITOR       ")

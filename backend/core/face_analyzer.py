@@ -121,6 +121,8 @@ class FaceAnalyzer:
         self.target_features = []  # List of dicts: {"name": str, "feature": np.ndarray}
         self.target_matching_enabled = True
         self.match_only_mode = False  # If True, ONLY matched faces are tracked & displayed
+        self.match_cache = {}  # face_id -> {"is_match": bool, "match_name": str, "match_score": int, "last_updated": int}
+        self.frame_count = 0
 
         self._init_models()
 
@@ -309,26 +311,28 @@ class FaceAnalyzer:
         Detects real human faces in frame and performs real-time target photo matching.
         Returns list of analyzed face dicts with bboxes, centroids, landmarks, confidence, and target match info.
         """
+        self.frame_count += 1
         h, w, _ = frame.shape
         rects = []
-        face_details = {}
+        raw_face_lookup = {}
 
-        # 1. Primary: YuNet Deep Learning Detector & SFace Feature Matcher
+        # 1. Primary: YuNet Deep Learning Detector
         if self.yunet_detector is not None:
-            sw, sh = int(w * 1.5), int(h * 1.5)
+            det_scale = 800.0 / w if w > 800 else 1.0
+            sw, sh = int(w * det_scale), int(h * det_scale)
             if (sw, sh) != self.input_size:
                 self.input_size = (sw, sh)
                 self.yunet_detector.setInputSize((sw, sh))
 
-            resized_15x = cv2.resize(frame, (sw, sh))
-            status, raw_faces = self.yunet_detector.detect(resized_15x)
+            det_frame = cv2.resize(frame, (sw, sh)) if det_scale != 1.0 else frame
+            status, raw_faces = self.yunet_detector.detect(det_frame)
 
             if status and raw_faces is not None and len(raw_faces) > 0:
                 max_w = min(int(w * 0.85), 800)
                 max_h = min(int(h * 0.85), 800)
 
                 for f in raw_faces:
-                    fx, fy, fw, fh = f[0:4] / 1.5
+                    fx, fy, fw, fh = f[0:4] / det_scale
                     score = float(f[-1])
 
                     # Face Size Bounds
@@ -347,7 +351,7 @@ class FaceAnalyzer:
                     bbox = (int(fx), int(fy), int(fw), int(fh))
                     rects.append(bbox)
 
-                    lmarks = f[4:14] / 1.5
+                    lmarks = f[4:14] / det_scale
                     landmarks_dict = {
                         "right_eye": (int(lmarks[0]), int(lmarks[1])),
                         "left_eye": (int(lmarks[2]), int(lmarks[3])),
@@ -357,28 +361,7 @@ class FaceAnalyzer:
                     }
 
                     display_conf = int(min(99, max(75, int(score * 100))))
-
-                    # Compute SFace Deep Feature & Match against Target Photos
-                    is_match, match_name, match_pct = False, "", 0
-                    if self.sface_recognizer is not None and self.target_features and self.target_matching_enabled:
-                        try:
-                            # Align face using unscaled original frame coordinates
-                            unscaled_f = f.copy()
-                            unscaled_f[0:4] /= 1.5
-                            unscaled_f[4:14] /= 1.5
-                            aligned = self.sface_recognizer.alignCrop(frame, unscaled_f)
-                            frame_feat = self.sface_recognizer.feature(aligned)
-                            is_match, match_name, match_pct = self.match_feature(frame_feat)
-                        except Exception as e:
-                            pass
-
-                    face_details[bbox] = {
-                        "confidence": display_conf,
-                        "landmarks": landmarks_dict,
-                        "is_match": is_match,
-                        "match_name": match_name,
-                        "match_score": match_pct
-                    }
+                    raw_face_lookup[bbox] = (f, display_conf, landmarks_dict)
 
         # 2. Fallback: Haar Cascade if no faces found by YuNet
         if len(rects) == 0 and self.haar_cascade is not None:
@@ -390,16 +373,16 @@ class FaceAnalyzer:
             for (fx, fy, fw, fh) in detected_haar:
                 bbox = (int(fx), int(fy), int(fw), int(fh))
                 rects.append(bbox)
-                face_details[bbox] = {
-                    "confidence": 85,
-                    "landmarks": None,
-                    "is_match": False,
-                    "match_name": "",
-                    "match_score": 0
-                }
+                raw_face_lookup[bbox] = (None, 85, None)
 
         # Update Centroid Tracker
         tracked_objects = self.tracker.update(rects)
+
+        # Clean up obsolete cached face IDs
+        active_ids = set(tracked_objects.keys())
+        for cached_id in list(self.match_cache.keys()):
+            if cached_id not in active_ids:
+                del self.match_cache[cached_id]
 
         analyzed_faces = []
         frame_area = w * h
@@ -417,9 +400,46 @@ class FaceAnalyzer:
             else:
                 proximity = "FAR"
 
-            details = face_details.get(bbox, {
-                "confidence": 80, "landmarks": None, "is_match": False, "match_name": "", "match_score": 0
-            })
+            # Lookup raw face detection metadata
+            f_info = raw_face_lookup.get(bbox)
+            if not f_info and raw_face_lookup:
+                closest_bbox = min(raw_face_lookup.keys(), key=lambda b: abs(b[0]-x) + abs(b[1]-y))
+                f_info = raw_face_lookup[closest_bbox]
+
+            display_conf = f_info[1] if f_info else 80
+            landmarks_dict = f_info[2] if f_info else None
+            raw_f = f_info[0] if f_info else None
+
+            # SFace Deep Feature Matching with Caching per face_id
+            is_match, match_name, match_pct = False, "", 0
+            if self.sface_recognizer is not None and self.target_features and self.target_matching_enabled:
+                cached = self.match_cache.get(face_id)
+                if cached and (self.frame_count - cached["last_updated"]) < 30:
+                    is_match = cached["is_match"]
+                    match_name = cached["match_name"]
+                    match_pct = cached["match_score"]
+                elif raw_f is not None:
+                    try:
+                        det_scale = 800.0 / w if w > 800 else 1.0
+                        unscaled_f = raw_f.copy()
+                        if det_scale != 1.0:
+                            unscaled_f[0:4] /= det_scale
+                            unscaled_f[4:14] /= det_scale
+                        aligned = self.sface_recognizer.alignCrop(frame, unscaled_f)
+                        frame_feat = self.sface_recognizer.feature(aligned)
+                        is_match, match_name, match_pct = self.match_feature(frame_feat)
+                        self.match_cache[face_id] = {
+                            "is_match": is_match,
+                            "match_name": match_name,
+                            "match_score": match_pct,
+                            "last_updated": self.frame_count
+                        }
+                    except Exception:
+                        pass
+                elif cached:
+                    is_match = cached["is_match"]
+                    match_name = cached["match_name"]
+                    match_pct = cached["match_score"]
 
             analyzed_faces.append({
                 "id": face_id,
@@ -427,11 +447,11 @@ class FaceAnalyzer:
                 "bbox": (x, y, fw, fh),
                 "centroid": data["centroid"],
                 "proximity": proximity,
-                "confidence": details["confidence"],
-                "landmarks": details["landmarks"],
-                "is_match": details["is_match"],
-                "match_name": details["match_name"],
-                "match_score": details["match_score"]
+                "confidence": display_conf,
+                "landmarks": landmarks_dict,
+                "is_match": is_match,
+                "match_name": match_name,
+                "match_score": match_pct
             })
 
         if self.match_only_mode and self.target_features and self.target_matching_enabled:

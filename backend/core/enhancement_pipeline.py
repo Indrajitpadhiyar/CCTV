@@ -103,7 +103,7 @@ class EnhancementPipeline:
                 enhanced = self._temporal_stabilize(enhanced)
             self.previous_frame = enhanced.copy()
             if enhanced.shape[:2] != (original_height, original_width):
-                enhanced = cv2.resize(enhanced, (original_width, original_height), interpolation=cv2.INTER_LANCZOS4)
+                enhanced = cv2.resize(enhanced, (original_width, original_height), interpolation=cv2.INTER_LINEAR)
             return enhanced, self._metrics(started, "ON")
         except Exception as exc:
             logger.error("Enhancement failed; displaying original frame: %s", exc)
@@ -128,7 +128,10 @@ class EnhancementPipeline:
 
     def _denoise(self, frame: np.ndarray) -> np.ndarray:
         if self.profile != "QUALITY":
-            filtered = cv2.bilateralFilter(frame, 5, 25, 25)
+            h, w = frame.shape[:2]
+            small = cv2.resize(frame, (max(1, w // 2), max(1, h // 2)), interpolation=cv2.INTER_LINEAR)
+            filtered_small = cv2.bilateralFilter(small, 3, 20, 20)
+            filtered = cv2.resize(filtered_small, (w, h), interpolation=cv2.INTER_LINEAR)
             blend = 0.18 + (0.12 * self.strength)
             return cv2.addWeighted(frame, 1.0 - blend, filtered, blend, 0)
         filter_strength = 2.0 + (3.0 * self.strength)

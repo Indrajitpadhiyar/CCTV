@@ -61,8 +61,7 @@ class CameraService:
         logger.info(f"Launching Live AI Screen for Source '{label}'...")
         logger.info("Controls: 'e' enhancement, 'd' denoise, 'l' low-light, 'r' SR, 'k' sharpen, 'c' color, 'y' temporal, 'z' zoom, +/- zoom level, 's' snapshot, 'q'/ESC exit.")
 
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.window_name, 1024, 576)
+        window_created = False
 
         while self.is_running:
             connected = self.reader.connect()
@@ -73,9 +72,9 @@ class CameraService:
                 # Dynamic frame timing delay for local video playback vs live streams
                 if self.video_path and self.reader.cap is not None:
                     fps = self.reader.cap.get(cv2.CAP_PROP_FPS)
-                    wait_delay = int(1000 / fps) if fps and fps > 0 else 33
+                    target_frame_ms = (1000.0 / fps) if fps and fps > 0 else 33.3
                 else:
-                    wait_delay = 1
+                    target_frame_ms = 1.0
 
                 while self.is_running:
                     loop_started = time.perf_counter()
@@ -84,6 +83,18 @@ class CameraService:
                     if not success:
                         logger.warning(f"Frame drop detected on camera [{label}]. Reconnecting...")
                         break
+
+                    if not window_created and frame is not None:
+                        h_native, w_native = frame.shape[:2]
+                        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+                        aspect = w_native / float(max(1, h_native))
+                        win_w = 1280
+                        win_h = int(win_w / aspect) if aspect > 0 else 720
+                        if win_h > 720:
+                            win_h = 720
+                            win_w = int(win_h * aspect)
+                        cv2.resizeWindow(self.window_name, max(320, win_w), max(240, win_h))
+                        window_created = True
 
                     if pts_ms <= 0:
                         pts_ms = (time.time() - self.start_time) * 1000
@@ -128,7 +139,13 @@ class CameraService:
                     )
                     cv2.imshow(self.window_name, rendered)
 
-                    # Handle key presses with frame rate pacing for local video
+                    # Handle key presses with dynamic frame rate pacing for local video
+                    if self.video_path:
+                        elapsed_ms = (time.perf_counter() - loop_started) * 1000.0
+                        wait_delay = max(1, int(target_frame_ms - elapsed_ms))
+                    else:
+                        wait_delay = 1
+
                     key = cv2.waitKey(wait_delay) & 0xFF
                     if key == ord('q') or key == 27:
                         logger.info("User requested exit.")

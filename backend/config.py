@@ -52,7 +52,7 @@ ENABLE_SUPER_RESOLUTION = os.getenv("ENABLE_SUPER_RESOLUTION", "false").lower() 
 ENABLE_SHARPEN = os.getenv("ENABLE_SHARPEN", "true").lower() == "true"
 ENABLE_COLOR_CORRECTION = os.getenv("ENABLE_COLOR_CORRECTION", "true").lower() == "true"
 ENABLE_TEMPORAL_STABILITY = os.getenv("ENABLE_TEMPORAL_STABILITY", "true").lower() == "true"
-ENHANCEMENT_STRENGTH = float(os.getenv("ENHANCEMENT_STRENGTH", "0.45"))
+ENHANCEMENT_STRENGTH = float(os.getenv("ENHANCEMENT_STRENGTH", "0.55"))
 SUPER_RESOLUTION_MODEL = os.getenv(
 	"SUPER_RESOLUTION_MODEL",
 	os.path.join(os.path.dirname(__file__), "models", "EDSR_x2.pb")
