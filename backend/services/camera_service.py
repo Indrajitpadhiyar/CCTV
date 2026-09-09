@@ -22,7 +22,7 @@ logger = setup_logger("CameraService")
 class CameraService:
     """Manages camera playback lifecycle, face detection analytics, and GUI rendering."""
 
-    def __init__(self, camera_code: str = None, rtsp_url: str = None, video_path: str = None, target_path: str = None, match_only: bool = False, analyze_faces: bool = True, enhancement_enabled: bool = None, enhancement_profile: str = None, enhancement_strength: float = None):
+    def __init__(self, camera_code: str = None, rtsp_url: str = None, video_path: str = None, target_path: str = None, match_only: bool = False, analyze_faces: bool = True, multi_face: bool = True, enhancement_enabled: bool = None, enhancement_profile: str = None, enhancement_strength: float = None):
         self.camera_code = (camera_code or config.CAMERA_CODE).lower()
         self.rtsp_url = rtsp_url
         self.video_path = video_path
@@ -46,7 +46,7 @@ class CameraService:
         
         # Initialize Face Analyzer module & Load Reference Target Photos
         logger.info("Initializing Real-Time Face Detection & Deep Recognition Engine...")
-        self.face_analyzer = FaceAnalyzer()
+        self.face_analyzer = FaceAnalyzer(multi_face_mode=multi_face)
         self.face_analyzer.load_target_photos(self.target_path)
         self.face_analyzer.match_only_mode = match_only
 
@@ -59,7 +59,7 @@ class CameraService:
         self.is_running = True
         label = os.path.basename(self.video_path) if self.video_path else self.camera_code.upper()
         logger.info(f"Launching Live AI Screen for Source '{label}'...")
-        logger.info("Controls: 'e' enhancement, 'd' denoise, 'l' low-light, 'r' SR, 'k' sharpen, 'c' color, 'y' temporal, 'z' zoom, +/- zoom level, 's' snapshot, 'q'/ESC exit.")
+        logger.info("Controls: 'u' multi-face mode, 'm' match-only mode, 't' target matching, 'z' zoom, 'e' enhancement, 's' snapshot, 'q'/ESC exit.")
 
         window_created = False
 
@@ -69,10 +69,10 @@ class CameraService:
             if connected:
                 self.backoff_sec = config.MIN_RECONNECT_SEC
                 
-                # Dynamic frame timing delay for local video playback vs live streams
+                # Dynamic frame timing delay for 60 FPS playback vs live streams
                 if self.video_path and self.reader.cap is not None:
-                    fps = self.reader.cap.get(cv2.CAP_PROP_FPS)
-                    target_frame_ms = (1000.0 / fps) if fps and fps > 0 else 33.3
+                    target_fps = float(os.getenv("TARGET_FPS", "60.0"))
+                    target_frame_ms = 1000.0 / target_fps
                 else:
                     target_frame_ms = 1.0
 

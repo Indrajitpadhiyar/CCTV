@@ -8,10 +8,6 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Agent / IDE temporary scratch & brain files
-antigravity-ide/
-.gemini/
-
 # Models & weight files
 backend/models/
 *.pt
@@ -24,7 +20,17 @@ backend/models/
 env/
 venv/
 
-# IDE configurations
+# Snapshots, Targets, Video & Image Media Directories
+snapshots/
+backend/snapshots/
+video/
+backend/video/
+image/
+backend/image/
+targets/
+backend/targets/
+
+# IDE & OS temporary files
 .vscode/
 .idea/
 .DS_Store

@@ -1,7 +1,10 @@
 .env
 .venv
 __pycache__
-snapshots
+snapshots/
+video/
+image/
+targets/
 .vscode
 .idea
 .DS_Store

@@ -4,9 +4,11 @@ import cv2
 import numpy as np
 from typing import List, Dict, Tuple, Any, Optional
 
+import config
 from utils.logger import setup_logger
 
 logger = setup_logger("FaceAnalyzer")
+
 
 class CentroidTracker:
     """Tracks face centroids across frames to assign stable, persistent face IDs."""
@@ -107,7 +109,7 @@ class FaceAnalyzer:
     YUNET_MODEL_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
     SFACE_MODEL_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx"
 
-    def __init__(self, score_threshold: float = 0.35, min_size: Tuple[int, int] = (15, 15), match_threshold: float = 0.363):
+    def __init__(self, score_threshold: float = 0.30, min_size: Tuple[int, int] = (12, 12), match_threshold: float = 0.363, multi_face_mode: Optional[bool] = None):
         self.score_threshold = score_threshold
         self.min_size = min_size
         self.match_threshold = match_threshold
@@ -121,6 +123,8 @@ class FaceAnalyzer:
         self.target_features = []  # List of dicts: {"name": str, "feature": np.ndarray}
         self.target_matching_enabled = True
         self.match_only_mode = False  # If True, ONLY matched faces are tracked & displayed
+        self.multi_face_mode = multi_face_mode if multi_face_mode is not None else getattr(config, "MULTI_FACE_DEFAULT", True)
+        self.max_faces = getattr(config, "MAX_FACES_LIMIT", 50)
         self.match_cache = {}  # face_id -> {"is_match": bool, "match_name": str, "match_score": int, "last_updated": int}
         self.frame_count = 0
 
@@ -268,18 +272,22 @@ class FaceAnalyzer:
         return len(self.target_features)
 
     def extract_face_feature(self, img: np.ndarray) -> Optional[np.ndarray]:
-        """Extracts 128-d SFace feature embedding vector from an input image."""
+        """Extracts 128-d SFace feature embedding vector from an input image with multi-scale fallback."""
         if self.yunet_detector is None or self.sface_recognizer is None:
             return None
 
-        h, w, _ = img.shape
-        self.yunet_detector.setInputSize((w, h))
-        status, raw_faces = self.yunet_detector.detect(img)
+        # Multi-scale passes (1.0x, 1.5x, 2.0x) to locate target faces in reference photos
+        scales = [1.0, 1.5, 2.0]
+        for scale in scales:
+            target_img = cv2.resize(img, (0, 0), fx=scale, fy=scale) if scale != 1.0 else img
+            h, w, _ = target_img.shape
+            self.yunet_detector.setInputSize((w, h))
+            status, raw_faces = self.yunet_detector.detect(target_img)
 
-        if status and raw_faces is not None and len(raw_faces) > 0:
-            aligned_face = self.sface_recognizer.alignCrop(img, raw_faces[0])
-            feature = self.sface_recognizer.feature(aligned_face)
-            return feature
+            if status and raw_faces is not None and len(raw_faces) > 0:
+                aligned_face = self.sface_recognizer.alignCrop(target_img, raw_faces[0])
+                feature = self.sface_recognizer.feature(aligned_face)
+                return feature
         return None
 
     def match_feature(self, query_feature: np.ndarray) -> Tuple[bool, str, int]:
@@ -326,6 +334,12 @@ class FaceAnalyzer:
 
             det_frame = cv2.resize(frame, (sw, sh)) if det_scale != 1.0 else frame
             status, raw_faces = self.yunet_detector.detect(det_frame)
+
+            # Secondary High-Recall Scale Pass if no faces detected on standard scale
+            if (not status or raw_faces is None or len(raw_faces) == 0) and det_scale != 1.0:
+                self.yunet_detector.setInputSize((w, h))
+                status, raw_faces = self.yunet_detector.detect(frame)
+                det_scale = 1.0
 
             if status and raw_faces is not None and len(raw_faces) > 0:
                 max_w = min(int(w * 0.85), 800)
@@ -374,6 +388,15 @@ class FaceAnalyzer:
                 bbox = (int(fx), int(fy), int(fw), int(fh))
                 rects.append(bbox)
                 raw_face_lookup[bbox] = (None, 85, None)
+
+        # 3. Apply Multi-Face / Single-Face mode filtering
+        if not self.multi_face_mode and len(rects) > 1:
+            # Single face mode: pick largest/most prominent face
+            rects.sort(key=lambda b: b[2] * b[3], reverse=True)
+            rects = rects[:1]
+        elif self.multi_face_mode and len(rects) > self.max_faces:
+            rects.sort(key=lambda b: b[2] * b[3], reverse=True)
+            rects = rects[:self.max_faces]
 
         # Update Centroid Tracker
         tracked_objects = self.tracker.update(rects)

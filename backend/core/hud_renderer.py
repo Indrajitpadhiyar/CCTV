@@ -17,7 +17,8 @@ class HUDRenderer:
         target_name: str = "",
         enhancement_metrics: Optional[Dict[str, Any]] = None,
         display_fps: float = 0.0,
-        target_zoom: float = 1.0
+        target_zoom: float = 1.0,
+        multi_face_mode: bool = True
     ) -> np.ndarray:
         h, w, _ = frame.shape
 
@@ -47,29 +48,34 @@ class HUDRenderer:
             face_count = len(faces) if faces is not None else 0
             matches = [f for f in (faces or []) if f.get("is_match")]
             match_count = len(matches)
+            multi_mode_tag = "MULTI" if multi_face_mode else "SINGLE"
 
             if match_count > 0:
                 badge_color = (0, 255, 120)  # Glowing emerald green for match
-                match_name_str = matches[0].get("match_name", "TARGET")
-                face_status_text = f"★ MATCH DETECTED: {match_name_str} ({matches[0].get('match_score', 0)}%) | FACES: {face_count}"
-                cv2.putText(frame, face_status_text, (w - 530, 42), cv2.FONT_HERSHEY_SIMPLEX, 0.45, badge_color, 1, cv2.LINE_AA)
+                match_strs = [f"{m.get('match_name', 'TARGET')} ({m.get('match_score', 0)}%)" for m in matches]
+                match_name_str = ", ".join(match_strs)
+                face_status_text = f"★ MATCH DETECTED: {match_name_str} | FACES: {face_count} [{multi_mode_tag}]"
+                (tw, _), _ = cv2.getTextSize(face_status_text, cv2.FONT_HERSHEY_SIMPLEX, 0.45, 1)
+                cv2.putText(frame, face_status_text, (max(10, w - tw - 20), 42), cv2.FONT_HERSHEY_SIMPLEX, 0.45, badge_color, 1, cv2.LINE_AA)
             elif target_loaded:
                 badge_color = (0, 70, 255)  # Bright Red/Amber for target not found
                 target_str = f" [{target_name}]" if target_name else ""
-                face_status_text = f"[!] TARGET FACE NOT FOUND{target_str} | FACES: {face_count}"
-                cv2.putText(frame, face_status_text, (w - 540, 42), cv2.FONT_HERSHEY_SIMPLEX, 0.45, badge_color, 1, cv2.LINE_AA)
+                face_status_text = f"[!] TARGET FACE NOT FOUND{target_str} | FACES: {face_count} [{multi_mode_tag}]"
+                (tw, _), _ = cv2.getTextSize(face_status_text, cv2.FONT_HERSHEY_SIMPLEX, 0.45, 1)
+                cv2.putText(frame, face_status_text, (max(10, w - tw - 20), 42), cv2.FONT_HERSHEY_SIMPLEX, 0.45, badge_color, 1, cv2.LINE_AA)
 
                 # Draw prominent HUD Alert Banner on upper-center of frame
                 alert_text = f"⚠ TARGET FACE NOT FOUND{target_str}"
-                (tw, th), _ = cv2.getTextSize(alert_text, cv2.FONT_HERSHEY_SIMPLEX, 0.55, 2)
-                bx, by = (w - tw) // 2, 85
-                cv2.rectangle(frame, (bx - 15, by - th - 10), (bx + tw + 15, by + 10), (10, 15, 26), -1)
-                cv2.rectangle(frame, (bx - 15, by - th - 10), (bx + tw + 15, by + 10), (0, 70, 255), 2)
+                (tw_a, th_a), _ = cv2.getTextSize(alert_text, cv2.FONT_HERSHEY_SIMPLEX, 0.55, 2)
+                bx, by = (w - tw_a) // 2, 85
+                cv2.rectangle(frame, (bx - 15, by - th_a - 10), (bx + tw_a + 15, by + 10), (10, 15, 26), -1)
+                cv2.rectangle(frame, (bx - 15, by - th_a - 10), (bx + tw_a + 15, by + 10), (0, 70, 255), 2)
                 cv2.putText(frame, alert_text, (bx, by - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 180, 255), 2, cv2.LINE_AA)
             else:
                 badge_color = (0, 230, 118) if face_count > 0 else (180, 190, 200)
-                face_status_text = f"DEEP FACE AI: ONLINE  |  FACES: {face_count}"
-                cv2.putText(frame, face_status_text, (w - 490, 42), cv2.FONT_HERSHEY_SIMPLEX, 0.45, badge_color, 1, cv2.LINE_AA)
+                face_status_text = f"DEEP FACE AI: ONLINE ({multi_mode_tag})  |  FACES: {face_count}"
+                (tw, _), _ = cv2.getTextSize(face_status_text, cv2.FONT_HERSHEY_SIMPLEX, 0.45, 1)
+                cv2.putText(frame, face_status_text, (max(10, w - tw - 20), 42), cv2.FONT_HERSHEY_SIMPLEX, 0.45, badge_color, 1, cv2.LINE_AA)
         else:
             cv2.putText(frame, "FACE AI: OFF (Press 'f')", (w - 410, 42), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (120, 130, 150), 1, cv2.LINE_AA)
 
@@ -85,7 +91,7 @@ class HUDRenderer:
 
         # Bottom Information Bar
         cv2.rectangle(frame, (0, h - 30), (w, h), (10, 15, 26), -1)
-        info_text = f"Res: {w}x{h} | E Enhance | D Denoise | L Low-light | R SR | K Sharpen | C Color | Y Temporal | Z Zoom | [ ] Strength | S Snapshot | Q Exit"
+        info_text = f"Res: {w}x{h} | U Multi-Face | M Match-Only | T Target-Match | Z Zoom | E Enhance | S Snapshot | Q Exit"
         cv2.putText(frame, info_text, (10, h - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.40, (180, 190, 200), 1, cv2.LINE_AA)
 
         return frame

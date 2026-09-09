@@ -59,8 +59,13 @@ SUPER_RESOLUTION_MODEL = os.getenv(
 )
 SUPER_RESOLUTION_MODEL_NAME = os.getenv("SUPER_RESOLUTION_MODEL_NAME", "edsr")
 SUPER_RESOLUTION_SCALE = int(os.getenv("SUPER_RESOLUTION_SCALE", "2"))
-# Recognition stays on the camera frame by default to preserve existing SFace behavior.
-FACE_ANALYSIS_ON_ENHANCED = os.getenv("FACE_ANALYSIS_ON_ENHANCED", "false").lower() == "true"
+# Recognition & face detection are performed on the enhanced frame by default for high precision.
+FACE_ANALYSIS_ON_ENHANCED = os.getenv("FACE_ANALYSIS_ON_ENHANCED", "true").lower() == "true"
+MULTI_FACE_DEFAULT = os.getenv("MULTI_FACE_DEFAULT", "true").lower() == "true"
+MAX_FACES_LIMIT = int(os.getenv("MAX_FACES_LIMIT", "50"))
 TARGET_ZOOM_DEFAULT = float(os.getenv("TARGET_ZOOM_DEFAULT", "2.0"))
-MAX_PROCESSING_FPS = float(os.getenv("MAX_PROCESSING_FPS", "30"))
+MAX_PROCESSING_FPS = float(os.getenv("MAX_PROCESSING_FPS", "60"))
+TARGET_FPS = float(os.getenv("TARGET_FPS", "60.0"))
+FRAME_SKIP_INTERVAL = int(os.getenv("FRAME_SKIP_INTERVAL", "2"))
 ENHANCEMENT_MAX_WIDTH = int(os.getenv("ENHANCEMENT_MAX_WIDTH", "1280"))
+

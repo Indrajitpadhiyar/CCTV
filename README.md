@@ -6,17 +6,17 @@ A robust, production-grade Python solution for live CCTV camera streaming (`cam0
 
 ## 🌟 Key Features
 
-- **YuNet Deep Learning Detection Engine**: Utilizes OpenCV YuNet ONNX neural model with multi-scale upscaling passes and aspect ratio filtering for accurate face detection across CCTV feeds and local test videos.
+- **Silky Smooth 60 FPS Video Processing Engine**: Optimized 60 FPS loop pacing and multi-threading for real-time live CCTV streams and video playback.
+- **Enhanced-First Face AI Pipeline**: Frame enhancement (low-light correction, fast denoising, sharpening, color stabilization) runs **FIRST** before face detection & SFace feature extraction for ultra-high detection precision on low-light or low-contrast footage.
+- **Multi-Scale High-Precision YuNet Face Detector**: High-recall YuNet ONNX neural detection model with dynamic multi-scale passes and aspect ratio filtering.
 - **SFace Deep Learning Face Recognition (128-d Embeddings)**: Computes 128-dimensional feature vectors to match live faces against target reference photos (`--target`) using cosine similarity scoring (75%–99% match accuracy).
-- **"TARGET FACE NOT FOUND" Visual Alerts**: Automatically displays clear HUD status badges and on-screen alert banners (`[!] TARGET FACE NOT FOUND`) when a target face is absent from the feed, labeling non-matching faces as `NO MATCH`.
+- **Fast Parallel Multi-Video Search (`--video all`)**: Concurrently pre-scans all local video files and pops up active alert windows instantly when a target person is spotted.
 - **Match-Only Display Mode (`-m` / `--match-only`)**: Option to hide all non-matching individuals/strangers and track **ONLY** the target matched person on screen.
-- **Offline Video Testing (`-v` / `--video`)**: Run face detection and recognition on local `.mp4`, `.avi`, `.mov` test videos with native FPS synchronization and automatic file detection in `backend/video/`.
 - **Facial Landmark Estimation**: Detects and highlights 5 key facial landmarks (right eye, left eye, nose, right mouth, left mouth).
 - **Persistent Centroid Tracking**: Assigns stable, persistent face IDs (`FACE #01`, `FACE #02`) and tracks individuals across frames.
 - **RTSP/TCP Transport & HLS Fallback**: Forces `rtsp_transport;tcp` via OpenCV FFmpeg options to eliminate packet loss, with automatic CDN HLS fallback (`.m3u8`).
 - **Sci-Fi Head-Up Display (HUD)**: Displays presentation timestamps (PTS), status indicators (LIVE / RECONNECTING), target match counters, and tech UI reticles.
 - **Instant Snapshot Saver**: Save high-resolution timestamped frame snapshots with bounding box and match badges directly to `backend/snapshots/`.
-- **Automatic Fallbacks**: Includes Haar Cascade detector fallback for 100% offline detection availability.
 
 ---
 
@@ -27,23 +27,24 @@ A robust, production-grade Python solution for live CCTV camera streaming (`cam0
 ├── backend/
 │   ├── main.py                  # Primary CLI application entry point
 │   ├── stream_viewer.py         # Lightweight single-camera stream viewer
-│   ├── config.py                # Environment configuration & RTSP URL generator
+│   ├── config.py                # Central environment & 60 FPS configuration
 │   ├── requirements.txt         # Python dependency requirements
 │   ├── core/
-│   │   ├── face_analyzer.py     # YuNet Detector, SFace Recognizer & Centroid Tracker
-│   │   ├── enhancement_pipeline.py # Full-frame low-latency enhancement pipeline
+│   │   ├── face_analyzer.py     # High-precision YuNet Detector, SFace & Centroid Tracker
+│   │   ├── enhancement_pipeline.py # Low-latency frame enhancement pipeline
 │   │   ├── hud_renderer.py      # Sci-fi HUD overlay & target match graphics
 │   │   └── stream_reader.py     # OpenCV VideoCapture manager for RTSP/HLS/Video
 │   ├── services/
-│   │   └── camera_service.py    # Main camera playback loop & snapshot controller
+│   │   ├── camera_service.py    # Main 60 FPS camera playback loop & snapshot controller
+│   │   └── multi_video_service.py # Parallel multi-video search worker threads
 │   ├── models/                  # Downloaded ONNX neural model files (YuNet, SFace)
-│   ├── targets/                 # Target reference photos for face matching
-│   ├── image/                   # Additional reference images (e.g. kig.png)
-│   ├── video/                   # Local video files for testing
-│   ├── snapshots/               # Saved snapshot outputs
+│   ├── targets/                 # Target reference photos (gitignored)
+│   ├── image/                   # Target reference images (gitignored)
+│   ├── video/                   # Local video test files (gitignored)
+│   ├── snapshots/               # Saved snapshot outputs (gitignored)
 │   └── utils/
-│       └── logger.py            # Formatted log outputs
-├── .gitignore                   # Ignores models, virtualenvs, snapshots, and temp files
+│       └── logger.py            # UTF-8 formatted log outputs
+├── .gitignore                   # Excludes media files, models, and virtualenvs
 └── README.md                    # Project documentation
 ```
 
@@ -80,60 +81,27 @@ python main.py --rtsp-url "rtsp://user:pass@host:port/stream/cam01"
 
 ## 🎯 Target Photo Face Matching
 
-Place any target reference photo(s) in `backend/targets/` or `backend/image/` (e.g., `kig.png`, `john.jpg`).
+Place any target reference photo(s) in `backend/targets/` or `backend/image/` (e.g., `image.png`, `target.jpg`).
 
 ```bash
 # 1. Run Target Photo Matching on live camera stream
-python main.py --target "image/kig.png"
+python main.py --target "image/image.png"
 
 # 2. Run Target Photo Matching on a local test video
-python main.py --video --target "image/kig.png"
+python main.py --video "video/v1.mp4" --target "image/image.png"
 
 # 3. Run in Match-Only Mode (hides non-matching faces, tracks ONLY the target)
-python main.py --video --target "image/kig.png" --match-only
+python main.py --video "video/v1.mp4" --target "image/image.png" --match-only
 ```
 
 ---
 
-## 🎥 Local Video File Testing
+## 🎥 Multi-Video Parallel Target Search
 
 ```bash
-# Auto-detect and play test video from backend/video/ folder
-python main.py --video
-
-# Specify a custom video file path
-python main.py --video "video/WhatsApp Video 2026-01-31 at 9.24.24 PM.mp4"
+# Scan all local video files simultaneously and pop up alert windows instantly
+python main.py --video all --target "image/image.png"
 ```
-
----
-
-## Full-Frame Video Enhancement
-
-The camera loop enhances the complete frame before display, then runs face analysis and target matching. Target zoom is applied to the enhanced frame before the HUD is rendered. YuNet and SFace analyze the original frame by default to preserve existing recognition behavior; set `FACE_ANALYSIS_ON_ENHANCED=true` to analyze enhanced frames instead.
-
-The default `BALANCED` profile uses low-light correction, fast denoising, natural color correction, restrained sharpening, and temporal smoothing. Processing is resolution-aware and returns frames at their original dimensions. Enhancement failures fall back to the current original frame.
-
-```bash
-# Balanced enhancement (default)
-python main.py --video "video/v1.mp4" --target "image/p1.png"
-
-# Lowest-latency profile
-python main.py --profile performance
-
-# Disable enhancement while keeping face AI and target zoom
-python main.py --no-enhancement
-```
-
-Optional AI super-resolution is disabled unless a local OpenCV DNN super-resolution model is configured. It requires `opencv-contrib-python`, a validated local model, and settings such as:
-
-```text
-ENABLE_SUPER_RESOLUTION=true
-SUPER_RESOLUTION_MODEL=backend/models/EDSR_x2.pb
-SUPER_RESOLUTION_MODEL_NAME=edsr
-SUPER_RESOLUTION_SCALE=2
-```
-
-Enhancement settings are centralized in `backend/config.py` and can be overridden through environment variables, including `ENHANCEMENT_PROFILE`, `ENHANCEMENT_STRENGTH`, `ENHANCEMENT_MAX_WIDTH`, and the individual `ENABLE_*` switches.
 
 ---
 
@@ -150,7 +118,7 @@ While the video window is focused:
 | **`e`** | Toggle full-frame enhancement |
 | **`d`** | Toggle denoising |
 | **`l`** | Toggle low-light enhancement |
-| **`r`** | Toggle optional super-resolution |
+| **`r`** | Toggle super-resolution |
 | **`k`** | Toggle sharpening |
 | **`c`** | Toggle color correction |
 | **`y`** | Toggle temporal stabilization |

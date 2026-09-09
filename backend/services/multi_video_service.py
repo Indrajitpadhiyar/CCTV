@@ -68,8 +68,8 @@ class VideoWorker(threading.Thread):
             logger.error(f"Failed to load video: {self.video_name}")
             return
 
-        fps = self.reader.cap.get(cv2.CAP_PROP_FPS) if self.reader.cap else 30.0
-        target_frame_ms = (1000.0 / fps) if fps and fps > 0 else 33.3
+        target_fps = float(os.getenv("TARGET_FPS", "60.0"))
+        target_frame_ms = 1000.0 / target_fps
 
         start_time = time.time()
 
@@ -232,7 +232,7 @@ class MultiVideoService:
                         if worker.has_match:
                             if not worker.window_opened:
                                 logger.info(
-                                    f"★ ALERT! TARGET PERSON SPOTTED IN CAMERA [{worker.video_name}] | "
+                                    f"[*] ALERT! TARGET PERSON SPOTTED IN CAMERA [{worker.video_name}] | "
                                     f"LOCATION: [{worker.location_name}]! POPPING UP WINDOW INSTANTLY!"
                                 )
                                 cv2.namedWindow(worker.window_name, cv2.WINDOW_NORMAL)
