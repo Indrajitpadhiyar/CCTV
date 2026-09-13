@@ -43,7 +43,7 @@ def main():
     parser.add_argument(
         "--camera",
         type=str,
-        default="cam17",
+        default="cam24",
         help="Camera code to stream (e.g. cam01, cam04, cam15, cam30). Default: cam17"
     )
     parser.add_argument(
@@ -112,7 +112,19 @@ def main():
         default=None,
         help="Enhancement strength from 0.0 to 1.0"
     )
+    parser.add_argument(
+        "--server",
+        action="store_true",
+        default=False,
+        help="Run continuous CCTV AI HTTP API Server on port 8000 for frontend connection"
+    )
     args = parser.parse_args()
+
+    if args.server:
+        from api_server import run_server
+        port = int(os.getenv("PORT", 8000))
+        run_server(port=port)
+        return
 
     target_photo_path = args.target if args.target != "auto" else os.path.join(BACKEND_DIR, "targets")
 

@@ -34,3 +34,10 @@ backend/targets/
 .vscode/
 .idea/
 .DS_Store
+
+# Node & Frontend dependencies/build
+node_modules/
+dist/
+package-lock.json
+package.json
+frontend/dist/
