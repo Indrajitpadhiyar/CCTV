@@ -1,4 +1,5 @@
 import os
+import threading
 import urllib.request
 import cv2
 import numpy as np
@@ -119,6 +120,7 @@ class FaceAnalyzer:
         self.yunet_detector = None
         self.sface_recognizer = None
         self.input_size = (960, 540)
+        self.detect_lock = threading.Lock()
         
         self.target_features = []  # List of dicts: {"name": str, "feature": np.ndarray}
         self.target_matching_enabled = True
@@ -134,6 +136,8 @@ class FaceAnalyzer:
         try:
             cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
             self.haar_cascade = cv2.CascadeClassifier(cascade_path)
+            if self.haar_cascade.empty():
+                self.haar_cascade = None
         except Exception as e:
             logger.warning(f"Haar Cascade fallback unavailable: {e}")
             self.haar_cascade = None
@@ -278,16 +282,18 @@ class FaceAnalyzer:
 
         # Multi-scale passes (1.0x, 1.5x, 2.0x) to locate target faces in reference photos
         scales = [1.0, 1.5, 2.0]
-        for scale in scales:
-            target_img = cv2.resize(img, (0, 0), fx=scale, fy=scale) if scale != 1.0 else img
-            h, w, _ = target_img.shape
-            self.yunet_detector.setInputSize((w, h))
-            status, raw_faces = self.yunet_detector.detect(target_img)
+        with self.detect_lock:
+            for scale in scales:
+                target_img = cv2.resize(img, (0, 0), fx=scale, fy=scale) if scale != 1.0 else img
+                h, w, _ = target_img.shape
+                self.input_size = (w, h)
+                self.yunet_detector.setInputSize((w, h))
+                status, raw_faces = self.yunet_detector.detect(target_img)
 
-            if status and raw_faces is not None and len(raw_faces) > 0:
-                aligned_face = self.sface_recognizer.alignCrop(target_img, raw_faces[0])
-                feature = self.sface_recognizer.feature(aligned_face)
-                return feature
+                if status and raw_faces is not None and len(raw_faces) > 0:
+                    aligned_face = self.sface_recognizer.alignCrop(target_img, raw_faces[0])
+                    feature = self.sface_recognizer.feature(aligned_face)
+                    return feature
         return None
 
     def match_feature(self, query_feature: np.ndarray) -> Tuple[bool, str, int]:
@@ -328,18 +334,19 @@ class FaceAnalyzer:
         if self.yunet_detector is not None:
             det_scale = 800.0 / w if w > 800 else 1.0
             sw, sh = int(w * det_scale), int(h * det_scale)
-            if (sw, sh) != self.input_size:
+            det_frame = cv2.resize(frame, (sw, sh)) if det_scale != 1.0 else frame
+
+            with self.detect_lock:
                 self.input_size = (sw, sh)
                 self.yunet_detector.setInputSize((sw, sh))
+                status, raw_faces = self.yunet_detector.detect(det_frame)
 
-            det_frame = cv2.resize(frame, (sw, sh)) if det_scale != 1.0 else frame
-            status, raw_faces = self.yunet_detector.detect(det_frame)
-
-            # Secondary High-Recall Scale Pass if no faces detected on standard scale
-            if (not status or raw_faces is None or len(raw_faces) == 0) and det_scale != 1.0:
-                self.yunet_detector.setInputSize((w, h))
-                status, raw_faces = self.yunet_detector.detect(frame)
-                det_scale = 1.0
+                # Secondary High-Recall Scale Pass if no faces detected on standard scale
+                if (not status or raw_faces is None or len(raw_faces) == 0) and det_scale != 1.0:
+                    self.input_size = (w, h)
+                    self.yunet_detector.setInputSize((w, h))
+                    status, raw_faces = self.yunet_detector.detect(frame)
+                    det_scale = 1.0
 
             if status and raw_faces is not None and len(raw_faces) > 0:
                 max_w = min(int(w * 0.85), 800)
@@ -378,7 +385,7 @@ class FaceAnalyzer:
                     raw_face_lookup[bbox] = (f, display_conf, landmarks_dict)
 
         # 2. Fallback: Haar Cascade if no faces found by YuNet
-        if len(rects) == 0 and self.haar_cascade is not None:
+        if len(rects) == 0 and self.haar_cascade is not None and not self.haar_cascade.empty():
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             gray = cv2.equalizeHist(gray)
             detected_haar = self.haar_cascade.detectMultiScale(

@@ -34,11 +34,37 @@ export async function fetchDistrictsAndAreas() {
   return null;
 }
 
+export async function fetchAllCameras(onlyAvailable = true) {
+  try {
+    const url = new URL(`${BACKEND_URL}/api/cameras`);
+    url.searchParams.append('city', 'all');
+    if (onlyAvailable) url.searchParams.append('available', 'true');
+
+    const res = await fetch(url.toString(), {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(4000)
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    // Fallback handled in UI
+  }
+  return null;
+}
+
 export async function fetchCamerasByArea(city, area, onlyAvailable = true) {
   try {
     const url = new URL(`${BACKEND_URL}/api/cameras`);
-    if (city) url.searchParams.append('city', city);
-    if (area) url.searchParams.append('area', area);
+    if (city && city.toLowerCase() !== 'all') {
+      url.searchParams.append('city', city);
+    } else {
+      url.searchParams.append('city', 'all');
+    }
+    if (area && area.toLowerCase() !== 'all') {
+      url.searchParams.append('area', area);
+    }
     if (onlyAvailable) url.searchParams.append('available', 'true');
 
     const res = await fetch(url.toString(), {
@@ -96,4 +122,55 @@ export async function submitHumanVerification({ verdict, cameraId, officerBadge 
     // Fallback
   }
   return null;
+}
+
+export async function fetchDetections() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/detections`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(3000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.detections || [];
+    }
+  } catch (err) {
+    // Return empty on failure
+  }
+  return [];
+}
+
+export async function fetchMatches() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/matches`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(3000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.matches || [];
+    }
+  } catch (err) {
+    // Return empty on failure
+  }
+  return [];
+}
+
+export async function fetchAlerts() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/alerts`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(3000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.alerts || [];
+    }
+  } catch (err) {
+    // Return empty on failure
+  }
+  return [];
 }

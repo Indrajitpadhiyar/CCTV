@@ -3,12 +3,14 @@ import { SECURITY_ALERTS } from '../data/mockData';
 import { Badge } from '../components/common/Badge';
 import { ShieldAlertIcon, AlertTriangleIcon, BellIcon, CheckCircleIcon, EyeIcon } from '../components/common/Icons';
 
-export function AlertsPage({ onSelectMatch }) {
-  const [alertsList, setAlertsList] = useState(SECURITY_ALERTS);
+export function AlertsPage({ onSelectMatch, alerts = [], onNavigate }) {
+  const [dismissedIds, setDismissedIds] = useState(new Set());
   const [priorityFilter, setPriorityFilter] = useState('all');
 
+  const alertsList = alerts.filter((a) => !dismissedIds.has(a.alertId));
+
   const handleDismiss = (id) => {
-    setAlertsList(alertsList.filter((a) => a.alertId !== id));
+    setDismissedIds((prev) => new Set([...prev, id]));
   };
 
   const filtered = alertsList.filter((a) => {
@@ -163,12 +165,12 @@ export function AlertsPage({ onSelectMatch }) {
                       className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition shadow-2xs flex items-center gap-1.5"
                     >
                       <EyeIcon className="w-3.5 h-3.5" />
-                      Review
+                      Review Footage
                     </button>
                   ) : (
                     <button
                       type="button"
-                      onClick={() => alert(`Reviewing incident ${alert.alertId}...`)}
+                      onClick={() => onSelectMatch && onSelectMatch(alert.alertId)}
                       className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition shadow-2xs"
                     >
                       Review
@@ -189,8 +191,23 @@ export function AlertsPage({ onSelectMatch }) {
         })}
 
         {filtered.length === 0 && (
-          <div className="bg-white p-12 text-center rounded-xl border border-slate-200 text-slate-400 text-xs">
-            All security alerts in this category have been acknowledged or resolved.
+          <div className="bg-white p-12 text-center rounded-xl border border-slate-200 shadow-2xs space-y-3">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
+              <CheckCircleIcon className="w-6 h-6" />
+            </div>
+            <h4 className="text-sm font-bold text-slate-800">No Active Security Alerts</h4>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              All monitored CCTV feeds across Gujarat are operating normally. Real-time biometric alerts will appear here automatically when a face match or threat is detected.
+            </p>
+            {onNavigate && (
+              <button
+                type="button"
+                onClick={() => onNavigate('dashboard')}
+                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow-xs transition"
+              >
+                Go to Face Scan / Dashboard
+              </button>
+            )}
           </div>
         )}
       </div>

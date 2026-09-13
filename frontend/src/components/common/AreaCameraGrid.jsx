@@ -88,7 +88,15 @@ export function AreaCameraGrid({
                   />
                 ) : (
                   <>
-                    {/* Simulated CCTV feed view */}
+                    <img
+                      src={cam.snapshot_url || (cam.code ? `http://127.0.0.1:8000/api/camera/${cam.code}/snapshot` : null)}
+                      alt={cam.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    {/* Simulated CCTV feed view fallback */}
                     <div className="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
                     <svg className="absolute inset-0 w-full h-full opacity-35" viewBox="0 0 320 180" preserveAspectRatio="none">
                       <polygon points="0,180 140,80 180,80 320,180" fill="#1e293b" />

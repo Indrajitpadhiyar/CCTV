@@ -3,7 +3,7 @@ import { ANALYTICS_DATA } from '../data/mockData';
 import { BarChartIcon, DownloadIcon, CheckCircleIcon, AlertTriangleIcon } from '../components/common/Icons';
 
 export function ReportsPage() {
-  const maxHourlyDetection = Math.max(...ANALYTICS_DATA.hourlyDetections.map((d) => d.detections));
+  const maxHourlyDetection = Math.max(...ANALYTICS_DATA.hourlyDetections.map((d) => d.detections), 1);
 
   return (
     <div className="space-y-6">
@@ -105,37 +105,43 @@ export function ReportsPage() {
           </p>
 
           <div className="space-y-4">
-            {ANALYTICS_DATA.cityMatches.map((c) => (
-              <div key={c.city} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-slate-800">
-                  <span className="flex items-center gap-1.5">
-                    <span>{c.city}</span>
-                    <span className="text-[11px] font-normal text-slate-400">
-                      ({c.totalCameras} cameras)
+            {ANALYTICS_DATA.cityMatches.length > 0 ? (
+              ANALYTICS_DATA.cityMatches.map((c) => (
+                <div key={c.city} className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-slate-800">
+                    <span className="flex items-center gap-1.5">
+                      <span>{c.city}</span>
+                      <span className="text-[11px] font-normal text-slate-400">
+                        ({c.totalCameras} cameras)
+                      </span>
                     </span>
-                  </span>
-                  <span className="font-mono text-rose-700 font-bold">
-                    {c.count} Matches
-                  </span>
+                    <span className="font-mono text-rose-700 font-bold">
+                      {c.count} Matches
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden flex">
+                    <div
+                      className="bg-rose-600 h-2.5 rounded-l-full"
+                      style={{ width: `${(c.highRisk / 8) * 100}%` }}
+                      title="High Risk"
+                    ></div>
+                    <div
+                      className="bg-amber-500 h-2.5 rounded-r-full"
+                      style={{ width: `${((c.count - c.highRisk) / 8) * 100}%` }}
+                      title="Medium/Low"
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-400">
+                    <span>High Risk: {c.highRisk}</span>
+                    <span>Active Feeds: {c.activeFeeds}/{c.totalCameras}</span>
+                  </div>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden flex">
-                  <div
-                    className="bg-rose-600 h-2.5 rounded-l-full"
-                    style={{ width: `${(c.highRisk / 8) * 100}%` }}
-                    title="High Risk"
-                  ></div>
-                  <div
-                    className="bg-amber-500 h-2.5 rounded-r-full"
-                    style={{ width: `${((c.count - c.highRisk) / 8) * 100}%` }}
-                    title="Medium/Low"
-                  ></div>
-                </div>
-                <div className="flex justify-between text-[10px] text-slate-400">
-                  <span>High Risk: {c.highRisk}</span>
-                  <span>Active Feeds: {c.activeFeeds}/{c.totalCameras}</span>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 text-xs text-slate-400">
+                No criminal correlation records logged for this reporting period.
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -149,31 +155,37 @@ export function ReportsPage() {
           </p>
 
           <div className="space-y-4">
-            {ANALYTICS_DATA.confidenceDistribution.map((item) => (
-              <div key={item.range} className="p-3 rounded-lg border border-slate-100 bg-slate-50/60">
-                <div className="flex justify-between text-xs font-semibold text-slate-800 mb-1">
-                  <span className="flex items-center gap-2">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    ></span>
-                    <span>{item.label} ({item.range})</span>
-                  </span>
-                  <span className="font-mono font-bold text-slate-900">
-                    {item.count} detections
-                  </span>
+            {ANALYTICS_DATA.confidenceDistribution.length > 0 ? (
+              ANALYTICS_DATA.confidenceDistribution.map((item) => (
+                <div key={item.range} className="p-3 rounded-lg border border-slate-100 bg-slate-50/60">
+                  <div className="flex justify-between text-xs font-semibold text-slate-800 mb-1">
+                    <span className="flex items-center gap-2">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      ></span>
+                      <span>{item.label} ({item.range})</span>
+                    </span>
+                    <span className="font-mono font-bold text-slate-900">
+                      {item.count} detections
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="h-1.5 rounded-full"
+                      style={{
+                        backgroundColor: item.color,
+                        width: `${item.range === '< 70%' ? 100 : item.count * 6}%`
+                      }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="h-1.5 rounded-full"
-                    style={{
-                      backgroundColor: item.color,
-                      width: `${item.range === '< 70%' ? 100 : item.count * 6}%`
-                    }}
-                  ></div>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 text-xs text-slate-400">
+                Awaiting face detection scans to establish confidence distribution model.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -190,15 +202,21 @@ export function ReportsPage() {
           </p>
 
           <div className="divide-y divide-slate-100 text-xs">
-            {ANALYTICS_DATA.alertsByCategory.map((cat) => (
-              <div key={cat.category} className="py-2.5 flex items-center justify-between">
-                <span className="font-medium text-slate-700">{cat.category}</span>
-                <div className="flex items-center gap-3">
-                  <span className="font-mono font-bold text-slate-900">{cat.count}</span>
-                  <span className="text-slate-400 w-10 text-right">{cat.share}</span>
+            {ANALYTICS_DATA.alertsByCategory.length > 0 ? (
+              ANALYTICS_DATA.alertsByCategory.map((cat) => (
+                <div key={cat.category} className="py-2.5 flex items-center justify-between">
+                  <span className="font-medium text-slate-700">{cat.category}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono font-bold text-slate-900">{cat.count}</span>
+                    <span className="text-slate-400 w-10 text-right">{cat.share}</span>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-6 text-xs text-slate-400">
+                No active security incidents or classifications logged.
               </div>
-            ))}
+            )}
           </div>
         </div>
 

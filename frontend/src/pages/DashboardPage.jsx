@@ -38,7 +38,9 @@ export function DashboardPage({
   uploadedPhoto,
   backendConnected,
   onClearScan,
-  onVerifySpotting
+  onVerifySpotting,
+  activeAlertsCount = 0,
+  realtimeDetectionsCount = 0
 }) {
   const kpis = ANALYTICS_DATA.kpis;
   const [filterOnlyMatches, setFilterOnlyMatches] = useState(true);
@@ -119,7 +121,10 @@ export function DashboardPage({
             onToggleFilterOnlyMatches={setFilterOnlyMatches}
             onViewCamera={onViewCamera}
             onInspectMatch={(match) => {
-              if (onSelectMatch) onSelectMatch('MATCH-1024');
+              if (onSelectMatch) {
+                const targetId = match?.targetMatchId || match?.matchId || match?.id || match?.camera_id || 'MATCH-1';
+                onSelectMatch(targetId);
+              }
             }}
             selectedArea={selectedArea}
             selectedDistrict={selectedDistrict}
@@ -137,7 +142,7 @@ export function DashboardPage({
               Statewide Surveillance Telemetry & Intelligence
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Gujarat State Police Central Command overview across 128 active highway and municipal checkpoints
+              Gujarat State Police Central Command overview across active highway and municipal checkpoints
             </p>
           </div>
         </div>
@@ -146,10 +151,10 @@ export function DashboardPage({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Active Cameras"
-            value={kpis.activeCameras}
-            trend={kpis.activeCamerasTrend}
+            value={filteredCameras?.length || apiCameras?.length || 50}
+            trend="100% Online"
             trendPositive={true}
-            subtitle={kpis.activeCamerasSubtitle}
+            subtitle={`${filteredCameras?.length || apiCameras?.length || 50} Feeds Monitored`}
             icon={VideoIcon}
             variant="default"
             onClick={() => onNavigate('cameras')}
@@ -157,10 +162,10 @@ export function DashboardPage({
 
           <StatCard
             title="Faces Detected"
-            value={kpis.facesDetected}
-            trend="+18.4%"
+            value={realtimeDetectionsCount || (filteredMatches.length > 0 ? filteredMatches.length : 0)}
+            trend={filteredMatches.length > 0 ? 'Target Spotted' : 'Real-time AI'}
             trendPositive={true}
-            subtitle={kpis.facesDetectedSubtitle}
+            subtitle="Today"
             icon={ScanFaceIcon}
             variant="default"
             onClick={() => onNavigate('detections')}
@@ -168,23 +173,23 @@ export function DashboardPage({
 
           <StatCard
             title="Criminal Matches"
-            value={kpis.criminalMatches}
-            trend="Action Required"
-            trendPositive={false}
-            subtitle={kpis.criminalMatchesSubtitle}
+            value={filteredMatches.length}
+            trend={filteredMatches.length > 0 ? 'Action Required' : 'Normal'}
+            trendPositive={filteredMatches.length === 0}
+            subtitle={filteredMatches.length > 0 ? `${filteredMatches.length} Targets Flagged` : 'Awaiting Scans'}
             icon={UserCheckIcon}
-            variant="danger"
+            variant={filteredMatches.length > 0 ? 'danger' : 'default'}
             onClick={() => onNavigate('matches')}
           />
 
           <StatCard
             title="Active Alerts"
-            value={kpis.activeAlerts}
-            trend="Immediate"
-            trendPositive={false}
-            subtitle={kpis.activeAlertsSubtitle}
+            value={activeAlertsCount || (filteredMatches.length > 0 ? filteredMatches.length : 0)}
+            trend={activeAlertsCount > 0 || filteredMatches.length > 0 ? 'Immediate' : 'Clear'}
+            trendPositive={!(activeAlertsCount > 0 || filteredMatches.length > 0)}
+            subtitle={activeAlertsCount > 0 || filteredMatches.length > 0 ? 'Biometric Incidents' : 'Normal Surveillance'}
             icon={BellIcon}
-            variant="warning"
+            variant={activeAlertsCount > 0 || filteredMatches.length > 0 ? 'warning' : 'default'}
             onClick={() => onNavigate('alerts')}
           />
         </div>

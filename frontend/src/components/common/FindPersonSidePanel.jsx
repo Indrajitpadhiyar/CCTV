@@ -31,22 +31,51 @@ export function FindPersonSidePanel({
     }
   };
 
-  const handleUseSamplePhoto = () => {
-    // Generate a clean test neutral portrait svg data uri for instant testing
-    const sampleSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
-      <rect width="300" height="300" fill="#e2e8f0"/>
-      <circle cx="150" cy="115" r="55" fill="#94a3b8"/>
-      <ellipse cx="150" cy="240" rx="90" ry="70" fill="#64748b"/>
-      <circle cx="130" cy="110" r="6" fill="#1e293b"/>
-      <circle cx="170" cy="110" r="6" fill="#1e293b"/>
-      <line x1="150" y1="112" x2="150" y2="132" stroke="#1e293b" stroke-width="3"/>
-      <path d="M 135 145 Q 150 155 165 145" stroke="#1e293b" stroke-width="3" fill="none"/>
-      <rect x="75" y="45" width="150" height="180" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="6,4"/>
-      <text x="150" y="275" font-family="monospace" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">TARGET BIOMETRIC SAMPLE</text>
-    </svg>`;
-    const b64 = `data:image/svg+xml;base64,${btoa(sampleSvg)}`;
-    setTargetPhoto(b64);
-    setTargetName('Suspect #20841 (R. Solanki)');
+  const handleUseSamplePhoto = async () => {
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/sample-face');
+      const data = await res.json();
+      if (data && data.status === 'success' && data.image_base64) {
+        setTargetPhoto(data.image_base64);
+        setTargetName(data.target_name || 'Suspect Target #01 (Police Watchlist)');
+        return;
+      }
+    } catch (e) {
+      console.warn('Could not fetch sample face from API, using canvas generator:', e);
+    }
+
+    // High quality canvas PNG face fallback that OpenCV can decode natively
+    const canvas = document.createElement('canvas');
+    canvas.width = 320;
+    canvas.height = 320;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(0, 0, 320, 320);
+    ctx.fillStyle = '#cda584';
+    ctx.beginPath();
+    ctx.ellipse(160, 160, 80, 105, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.arc(130, 145, 9, 0, Math.PI * 2);
+    ctx.arc(190, 145, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#78350f';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(160, 145);
+    ctx.lineTo(155, 185);
+    ctx.lineTo(168, 185);
+    ctx.stroke();
+    ctx.strokeStyle = '#991b1b';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(160, 210, 22, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+
+    const pngData = canvas.toDataURL('image/png');
+    setTargetPhoto(pngData);
+    setTargetName('Suspect Target #01 (Police Watchlist)');
   };
 
   const handleScanSubmit = () => {

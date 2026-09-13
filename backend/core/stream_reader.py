@@ -67,14 +67,16 @@ class StreamReader:
                 return True
             self.cap.release()
 
-        logger.warning(f"RTSP feed unreachable. Trying HLS fallback: {_masked_url(self.hls_url)}")
-        self.cap = cv2.VideoCapture(self.hls_url, cv2.CAP_FFMPEG)
-        if self.cap.isOpened():
-            ret, frame = self.cap.read()
-            if ret and frame is not None and frame.size > 0:
-                logger.info(f"Connected successfully to HLS fallback feed [{self.camera_code.upper()}]")
+        logger.warning(f"RTSP and HLS feeds unreachable for [{self.camera_code.upper()}]. Trying local video fallback...")
+        num_match = re.search(r'\d+', self.camera_code)
+        num = int(num_match.group(0)) if num_match else 1
+        fallback_vid = os.path.join(BACKEND_DIR, "video", f"v{((num - 1) % 9) + 1}.mp4")
+        if os.path.exists(fallback_vid):
+            self.cap = cv2.VideoCapture(fallback_vid)
+            if self.cap.isOpened():
+                self.is_video_file = True
+                logger.info(f"Connected to local video fallback feed [{self.camera_code.upper()}]: {os.path.basename(fallback_vid)}")
                 return True
-            self.cap.release()
 
         self.cap = None
         return False

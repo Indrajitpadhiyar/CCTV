@@ -7,31 +7,61 @@ export const GUJARAT_CITIES_DATA = {
       'SG Highway': {
         stations: ['Sola Police Station', 'Sarkhej Police Station', 'Vastrapur Police Station'],
         cameras: [
-          { id: 'CAM-042', name: 'SG Highway - Sola Cross Roads', station: 'Sola Police Station', status: 'match', fps: 30, resolution: '4K (3840x2160)', facesNow: 12, lastMatch: 'MATCH-1024', riskLevel: 'high', type: 'PTZ Dome 360°' },
-          { id: 'CAM-038', name: 'SG Highway - Science City Junction', station: 'Sola Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 8, lastMatch: null, riskLevel: 'normal', type: 'Fixed Bullet 4K' },
-          { id: 'CAM-045', name: 'SG Highway - ISKCON Cross Roads', station: 'Sarkhej Police Station', status: 'online', fps: 28, resolution: '1080p FHD', facesNow: 19, lastMatch: null, riskLevel: 'normal', type: 'PTZ Dome 360°' },
-          { id: 'CAM-049', name: 'SG Highway - Gota Flyover North', station: 'Sola Police Station', status: 'warning', fps: 18, resolution: '1080p FHD', facesNow: 5, lastMatch: null, riskLevel: 'warning', type: 'LPR / ANPR Fixed' }
+          { id: 'CAM-01', code: 'cam01', name: 'SG Highway - Sola Cross Road (North)', station: 'Sola Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 12, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam01/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam01/stream' },
+          { id: 'CAM-02', code: 'cam02', name: 'SG Highway - Science City Flyover', station: 'Sola Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 8, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam02/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam02/stream' },
+          { id: 'CAM-03', code: 'cam03', name: 'SG Highway - ISKCON Junction Cross', station: 'Sarkhej Police Station', status: 'online', fps: 28, resolution: '1080p FHD', facesNow: 19, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam03/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam03/stream' },
+          { id: 'CAM-04', code: 'cam04', name: 'SG Highway - Gota Flyover Junction', station: 'Sola Police Station', status: 'warning', fps: 30, resolution: '1080p FHD', facesNow: 5, lastMatch: null, riskLevel: 'warning', type: 'ANPR Highway', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam04/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam04/stream' },
+          { id: 'CAM-05', code: 'cam05', name: 'SG Highway - YMCA Club Cross Road', station: 'Sarkhej Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 7, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam05/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam05/stream' },
+          { id: 'CAM-06', code: 'cam06', name: 'SG Highway - Pakwan Cross Road', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 14, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam06/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam06/stream' },
+          { id: 'CAM-07', code: 'cam07', name: 'SG Highway - Thaltej Underpass', station: 'Sola Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 9, lastMatch: null, riskLevel: 'normal', type: 'ANPR Highway', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam07/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam07/stream' },
+          { id: 'CAM-08', code: 'cam08', name: 'SG Highway - Vaishnodevi Circle', station: 'Sola Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 11, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam08/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam08/stream' },
+          { id: 'CAM-09', code: 'cam09', name: 'SG Highway - Prahladnagar Entry', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 16, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam09/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam09/stream' },
+          { id: 'CAM-10', code: 'cam10', name: 'SG Highway - Sarkhej Toll Plaza', station: 'Sarkhej Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 10, lastMatch: null, riskLevel: 'normal', type: 'ANPR Highway', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam10/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam10/stream' }
         ]
       },
       'Navrangpura': {
         stations: ['Navrangpura Police Station', 'Gujarat University Police Station'],
         cameras: [
-          { id: 'CAM-021', name: 'Commerce Six Roads Junction', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '4K (3840x2160)', facesNow: 14, lastMatch: null, riskLevel: 'normal', type: 'PTZ Dome 360°' },
-          { id: 'CAM-024', name: 'CG Road - Municipal Market', station: 'Navrangpura Police Station', status: 'online', fps: 29, resolution: '1080p FHD', facesNow: 22, lastMatch: null, riskLevel: 'normal', type: 'Fixed Bullet 4K' }
+          { id: 'CAM-11', code: 'cam11', name: 'Commerce Six Roads', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 14, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam11/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam11/stream' },
+          { id: 'CAM-12', code: 'cam12', name: 'CG Road - Municipal Market', station: 'Navrangpura Police Station', status: 'online', fps: 29, resolution: '1080p FHD', facesNow: 22, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam12/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam12/stream' },
+          { id: 'CAM-13', code: 'cam13', name: 'Swastik Cross Road', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 9, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam13/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam13/stream' },
+          { id: 'CAM-14', code: 'cam14', name: 'Mithakhali Six Roads', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 18, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam14/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam14/stream' },
+          { id: 'CAM-15', code: 'cam15', name: 'Stadium Cross Road', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 15, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam15/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam15/stream' },
+          { id: 'CAM-16', code: 'cam16', name: 'Law Garden Entry Road', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 12, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam16/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam16/stream' },
+          { id: 'CAM-17', code: 'cam17', name: 'Gujarat University Circle', station: 'Gujarat University Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 21, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam17/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam17/stream' },
+          { id: 'CAM-18', code: 'cam18', name: 'Panchvati Circle', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 8, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam18/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam18/stream' },
+          { id: 'CAM-19', code: 'cam19', name: 'Chimanlal Girdharlal Road', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 13, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam19/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam19/stream' },
+          { id: 'CAM-20', code: 'cam20', name: 'Navrangpura Bus Terminus', station: 'Navrangpura Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 25, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam20/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam20/stream' }
         ]
       },
       'Satellite': {
         stations: ['Satellite Police Station', 'Anandnagar Police Station'],
         cameras: [
-          { id: 'CAM-015', name: 'Shivranjani Cross Roads', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '4K (3840x2160)', facesNow: 16, lastMatch: null, riskLevel: 'normal', type: 'PTZ Dome 360°' },
-          { id: 'CAM-018', name: 'Jodhpur Cross Roads', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 11, lastMatch: null, riskLevel: 'normal', type: 'Fixed Bullet' }
+          { id: 'CAM-21', code: 'cam21', name: 'Shivranjani Cross Roads', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 16, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam21/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam21/stream' },
+          { id: 'CAM-22', code: 'cam22', name: 'Jodhpur Cross Roads', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 11, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam22/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam22/stream' },
+          { id: 'CAM-23', code: 'cam23', name: 'Shyamal Cross Roads', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 14, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam23/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam23/stream' },
+          { id: 'CAM-24', code: 'cam24', name: 'Ramdevnagar Circle', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 10, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam24/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam24/stream' },
+          { id: 'CAM-25', code: 'cam25', name: 'Mansi Circle Satellite', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 13, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam25/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam25/stream' },
+          { id: 'CAM-26', code: 'cam26', name: 'Star Bazaar Junction', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 17, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam26/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam26/stream' },
+          { id: 'CAM-27', code: 'cam27', name: 'Prernatirth Derasar Road', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 7, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam27/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam27/stream' },
+          { id: 'CAM-28', code: 'cam28', name: 'Keshavbaug Party Plot Cross', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 19, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam28/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam28/stream' },
+          { id: 'CAM-29', code: 'cam29', name: 'Satellite Police Station Gate', station: 'Satellite Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 6, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam29/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam29/stream' },
+          { id: 'CAM-30', code: 'cam30', name: 'Seema Hall Cross Road', station: 'Anandnagar Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 15, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam30/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam30/stream' }
         ]
       },
       'Vastrapur': {
         stations: ['Vastrapur Police Station'],
         cameras: [
-          { id: 'CAM-029', name: 'Vastrapur Lake East Promenade', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 9, lastMatch: null, riskLevel: 'normal', type: 'PTZ Dome 360°' },
-          { id: 'CAM-031', name: 'IIM Road Junction', station: 'Vastrapur Police Station', status: 'match', fps: 30, resolution: '4K (3840x2160)', facesNow: 15, lastMatch: 'MATCH-1033', riskLevel: 'medium', type: 'Fixed Bullet' }
+          { id: 'CAM-31', code: 'cam01', name: 'Vastrapur Lake East Promenade', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 9, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam01/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam01/stream' },
+          { id: 'CAM-32', code: 'cam02', name: 'IIM Ahmedabad New Campus Gate', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 15, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam02/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam02/stream' },
+          { id: 'CAM-33', code: 'cam03', name: 'Alpha One Mall Concourse', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 18, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam03/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam03/stream' },
+          { id: 'CAM-34', code: 'cam04', name: 'Sanjivani Hospital Cross Road', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 8, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam04/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam04/stream' },
+          { id: 'CAM-35', code: 'cam05', name: 'Gurukul Road Junction', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 14, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam05/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam05/stream' },
+          { id: 'CAM-36', code: 'cam06', name: 'Lad Society Road', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 6, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam06/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam06/stream' },
+          { id: 'CAM-37', code: 'cam07', name: 'Himmatlal Park Cross Road', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 11, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam07/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam07/stream' },
+          { id: 'CAM-38', code: 'cam08', name: 'Vastrapur Gam Gate', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 9, lastMatch: null, riskLevel: 'normal', type: '4K Bullet', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam08/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam08/stream' },
+          { id: 'CAM-39', code: 'cam09', name: 'Bodakdev Circle Link', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 13, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam09/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam09/stream' },
+          { id: 'CAM-40', code: 'cam10', name: 'Drive-In Road Cinema Junction', station: 'Vastrapur Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 17, lastMatch: null, riskLevel: 'normal', type: '4K PTZ Dome', snapshot_url: 'http://127.0.0.1:8000/api/camera/cam10/snapshot', stream_url: 'http://127.0.0.1:8000/api/camera/cam10/stream' }
         ]
       },
       'Maninagar': {
@@ -85,7 +115,7 @@ export const GUJARAT_CITIES_DATA = {
       'Varachha': {
         stations: ['Varachha Police Station'],
         cameras: [
-          { id: 'CAM-072', name: 'Mini Bazar Diamond Flyover', station: 'Varachha Police Station', status: 'match', fps: 30, resolution: '4K (3840x2160)', facesNow: 31, lastMatch: 'MATCH-1029', riskLevel: 'high', type: 'PTZ Dome 360°' }
+          { id: 'CAM-072', name: 'Mini Bazar Diamond Flyover', station: 'Varachha Police Station', status: 'online', fps: 30, resolution: '4K (3840x2160)', facesNow: 31, lastMatch: null, riskLevel: 'normal', type: 'PTZ Dome 360°' }
         ]
       },
       'Vesu': {
@@ -173,7 +203,7 @@ export const GUJARAT_CITIES_DATA = {
       'Bhaktinagar': {
         stations: ['Bhaktinagar Police Station'],
         cameras: [
-          { id: 'CAM-112', name: 'Bhaktinagar Circle', station: 'Bhaktinagar Police Station', status: 'match', fps: 30, resolution: '1080p FHD', facesNow: 14, lastMatch: 'MATCH-1041', riskLevel: 'medium', type: 'Fixed Bullet' }
+          { id: 'CAM-112', name: 'Bhaktinagar Circle', station: 'Bhaktinagar Police Station', status: 'online', fps: 30, resolution: '1080p FHD', facesNow: 14, lastMatch: null, riskLevel: 'normal', type: 'Fixed Bullet' }
         ]
       },
       'Race Course': {
@@ -399,756 +429,41 @@ export const getAllCameras = () => {
   return list;
 };
 
-// Recent Criminal Matches
-export const RECENT_MATCHES = [
-  {
-    matchId: 'MATCH-1024',
-    detectionId: 'DET-1024',
-    criminalId: 'CR-20841',
-    criminalName: 'Subject #20841 (Alias: "R. K. Solanki")',
-    caseId: 'FIR-2026/084-CYB',
-    chargeCategory: 'Organized Vehicle Theft & Grand Larceny',
-    confidence: 94.8,
-    camera: 'CAM-042',
-    cameraName: 'SG Highway - Sola Cross Roads',
-    city: 'Ahmedabad',
-    area: 'SG Highway',
-    policeStation: 'Sola Police Station',
-    detectedAt: '13 Sep 2026, 10:42 PM',
-    detectedAgo: '4 mins ago',
-    riskLevel: 'High Risk',
-    status: 'Requires Verification',
-    facialFeatures: {
-      structureMatch: 96.2,
-      eyeDistance: 93.8,
-      jawlineCorrelation: 94.5,
-      noseBridgeProfile: 95.1
-    },
-    cameraTrail: [
-      {
-        time: '10:42 PM',
-        camera: 'CAM-042',
-        name: 'SG Highway - Sola Cross Roads',
-        location: 'SG Highway, Ahmedabad',
-        policeStation: 'Sola Police Station',
-        confidence: 94.8,
-        status: 'Active Sight',
-        speedEstimate: '42 km/h (Northbound in silver sedan)',
-        isCurrent: true
-      },
-      {
-        time: '10:31 PM',
-        camera: 'CAM-038',
-        name: 'SG Highway - Science City Junction',
-        location: 'SG Highway, Ahmedabad',
-        policeStation: 'Sola Police Station',
-        confidence: 91.2,
-        status: 'Confirmed Sight',
-        speedEstimate: '45 km/h',
-        isCurrent: false
-      },
-      {
-        time: '10:18 PM',
-        camera: 'CAM-021',
-        name: 'Commerce Six Roads Junction',
-        location: 'Navrangpura, Ahmedabad',
-        policeStation: 'Navrangpura Police Station',
-        confidence: 87.6,
-        status: 'Matched',
-        speedEstimate: '30 km/h',
-        isCurrent: false
-      },
-      {
-        time: '09:55 PM',
-        camera: 'CAM-015',
-        name: 'Shivranjani Cross Roads',
-        location: 'Satellite, Ahmedabad',
-        policeStation: 'Satellite Police Station',
-        confidence: 78.4,
-        status: 'Partial Angle',
-        speedEstimate: 'Pedestrian Crossing',
-        isCurrent: false
-      }
-    ]
-  },
-  {
-    matchId: 'MATCH-1029',
-    detectionId: 'DET-1029',
-    criminalId: 'CR-19402',
-    criminalName: 'Subject #19402 (Alias: "M. Patel")',
-    caseId: 'FIR-2025/119-ECO',
-    chargeCategory: 'High Value Financial Fraud & Absconding',
-    confidence: 92.4,
-    camera: 'CAM-072',
-    cameraName: 'Mini Bazar Diamond Flyover',
-    city: 'Surat',
-    area: 'Varachha',
-    policeStation: 'Varachha Police Station',
-    detectedAt: '13 Sep 2026, 10:15 PM',
-    detectedAgo: '31 mins ago',
-    riskLevel: 'High Risk',
-    status: 'Requires Verification',
-    facialFeatures: {
-      structureMatch: 93.0,
-      eyeDistance: 91.5,
-      jawlineCorrelation: 92.8,
-      noseBridgeProfile: 92.3
-    },
-    cameraTrail: [
-      {
-        time: '10:15 PM',
-        camera: 'CAM-072',
-        name: 'Mini Bazar Diamond Flyover',
-        location: 'Varachha, Surat',
-        policeStation: 'Varachha Police Station',
-        confidence: 92.4,
-        status: 'Active Sight',
-        speedEstimate: 'Motorcycle Transit',
-        isCurrent: true
-      },
-      {
-        time: '09:40 PM',
-        camera: 'CAM-078',
-        name: 'Textile Market Flyover West',
-        location: 'Ring Road, Surat',
-        policeStation: 'Salabatpura Police Station',
-        confidence: 86.2,
-        status: 'Matched',
-        speedEstimate: '25 km/h',
-        isCurrent: false
-      }
-    ]
-  },
-  {
-    matchId: 'MATCH-1033',
-    detectionId: 'DET-1033',
-    criminalId: 'CR-18230',
-    criminalName: 'Subject #18230 (Alias: "D. Varma")',
-    caseId: 'FIR-2026/012-IPC',
-    chargeCategory: 'Illegal Weapon Possession & Extortion',
-    confidence: 89.6,
-    camera: 'CAM-031',
-    cameraName: 'IIM Road Junction',
-    city: 'Ahmedabad',
-    area: 'Vastrapur',
-    policeStation: 'Vastrapur Police Station',
-    detectedAt: '13 Sep 2026, 09:50 PM',
-    detectedAgo: '56 mins ago',
-    riskLevel: 'Medium Risk',
-    status: 'Under Review',
-    facialFeatures: {
-      structureMatch: 89.2,
-      eyeDistance: 90.1,
-      jawlineCorrelation: 88.7,
-      noseBridgeProfile: 90.4
-    },
-    cameraTrail: [
-      {
-        time: '09:50 PM',
-        camera: 'CAM-031',
-        name: 'IIM Road Junction',
-        location: 'Vastrapur, Ahmedabad',
-        policeStation: 'Vastrapur Police Station',
-        confidence: 89.6,
-        status: 'Active Sight',
-        speedEstimate: 'Pedestrian',
-        isCurrent: true
-      },
-      {
-        time: '09:12 PM',
-        camera: 'CAM-029',
-        name: 'Vastrapur Lake East Promenade',
-        location: 'Vastrapur, Ahmedabad',
-        policeStation: 'Vastrapur Police Station',
-        confidence: 85.0,
-        status: 'Matched',
-        speedEstimate: 'Walkway',
-        isCurrent: false
-      }
-    ]
-  },
-  {
-    matchId: 'MATCH-1041',
-    detectionId: 'DET-1041',
-    criminalId: 'CR-17655',
-    criminalName: 'Subject #17655 (Alias: "V. Jadeja")',
-    caseId: 'FIR-2024/902-NDP',
-    chargeCategory: 'Narcotics Trafficking & Bailable Warrant',
-    confidence: 88.1,
-    camera: 'CAM-112',
-    cameraName: 'Bhaktinagar Circle',
-    city: 'Rajkot',
-    area: 'Bhaktinagar',
-    policeStation: 'Bhaktinagar Police Station',
-    detectedAt: '13 Sep 2026, 09:22 PM',
-    detectedAgo: '1h 24m ago',
-    riskLevel: 'Medium Risk',
-    status: 'Flagged for Intercept',
-    facialFeatures: {
-      structureMatch: 88.4,
-      eyeDistance: 87.9,
-      jawlineCorrelation: 89.0,
-      noseBridgeProfile: 87.2
-    },
-    cameraTrail: [
-      {
-        time: '09:22 PM',
-        camera: 'CAM-112',
-        name: 'Bhaktinagar Circle',
-        location: 'Bhaktinagar, Rajkot',
-        policeStation: 'Bhaktinagar Police Station',
-        confidence: 88.1,
-        status: 'Active Sight',
-        speedEstimate: 'Public Bus Terminal',
-        isCurrent: true
-      }
-    ]
-  },
-  {
-    matchId: 'MATCH-1048',
-    detectionId: 'DET-1048',
-    criminalId: 'CR-21019',
-    criminalName: 'Subject #21019 (Alias: "S. Mansuri")',
-    caseId: 'FIR-2026/304-EXP',
-    chargeCategory: 'Inter-district Commercial Burglary',
-    confidence: 95.3,
-    camera: 'CAM-088',
-    cameraName: 'Railway Station West Outgate',
-    city: 'Vadodara',
-    area: 'Alkapuri',
-    policeStation: 'Sayajigunj Police Station',
-    detectedAt: '13 Sep 2026, 08:44 PM',
-    detectedAgo: '2h 02m ago',
-    riskLevel: 'High Risk',
-    status: 'Requires Verification',
-    facialFeatures: {
-      structureMatch: 95.8,
-      eyeDistance: 94.6,
-      jawlineCorrelation: 96.0,
-      noseBridgeProfile: 95.0
-    },
-    cameraTrail: [
-      {
-        time: '08:44 PM',
-        camera: 'CAM-088',
-        name: 'Railway Station West Outgate',
-        location: 'Alkapuri, Vadodara',
-        policeStation: 'Sayajigunj Police Station',
-        confidence: 95.3,
-        status: 'Active Sight',
-        speedEstimate: 'Platform concourse exit',
-        isCurrent: true
-      },
-      {
-        time: '08:20 PM',
-        camera: 'CAM-090',
-        name: 'Kala Ghoda Circle',
-        location: 'Sayajigunj, Vadodara',
-        policeStation: 'Sayajigunj Police Station',
-        confidence: 88.9,
-        status: 'Matched',
-        speedEstimate: 'Auto-rickshaw',
-        isCurrent: false
-      }
-    ]
-  },
-  {
-    matchId: 'MATCH-1052',
-    detectionId: 'DET-1052',
-    criminalId: 'CR-16320',
-    criminalName: 'Subject #16320 (Alias: "N. Gohil")',
-    caseId: 'FIR-2025/441-TER',
-    chargeCategory: 'Cyber Harassment & Digital Ransom',
-    confidence: 84.7,
-    camera: 'CAM-120',
-    cameraName: 'New Sachivalaya Gate 1',
-    city: 'Gandhinagar',
-    area: 'Sector 6 (Sachivalaya)',
-    policeStation: 'Sector 7 Police Station',
-    detectedAt: '13 Sep 2026, 07:15 PM',
-    detectedAgo: '3h 31m ago',
-    riskLevel: 'Low Risk',
-    status: 'Verified False Alarm',
-    facialFeatures: {
-      structureMatch: 84.0,
-      eyeDistance: 85.2,
-      jawlineCorrelation: 83.9,
-      noseBridgeProfile: 85.8
-    },
-    cameraTrail: [
-      {
-        time: '07:15 PM',
-        camera: 'CAM-120',
-        name: 'New Sachivalaya Gate 1',
-        location: 'Sector 6, Gandhinagar',
-        policeStation: 'Sector 7 Police Station',
-        confidence: 84.7,
-        status: 'Cleared by Officer',
-        speedEstimate: 'Visitor entrance',
-        isCurrent: true
-      }
-    ]
-  }
-];
+// Recent Criminal Matches (Dynamic - Populated upon actual Face Detection scans)
+export const RECENT_MATCHES = [];
 
-// Criminal Database Records
-export const CRIMINAL_DATABASE = [
-  {
-    criminalId: 'CR-20841',
-    name: 'Subject #20841',
-    alias: 'R. K. Solanki',
-    caseId: 'FIR-2026/084-CYB',
-    category: 'Organized Vehicle Theft',
-    riskLevel: 'High Risk',
-    warrantStatus: 'Active Non-Bailable Warrant',
-    lastKnownLocation: 'Ahmedabad - SG Highway Belt',
-    lastDetection: '13 Sep 2026, 10:42 PM (CAM-042)',
-    policeStation: 'Sola Police Station',
-    city: 'Ahmedabad',
-    ageRange: '32-36 yrs',
-    gender: 'Male',
-    height: "5' 9\"",
-    biometricRecordId: 'BIO-GJ-884920',
-    status: 'Active Pursuit'
-  },
-  {
-    criminalId: 'CR-19402',
-    name: 'Subject #19402',
-    alias: 'M. Patel',
-    caseId: 'FIR-2025/119-ECO',
-    category: 'Financial Fraud & Absconding',
-    riskLevel: 'High Risk',
-    warrantStatus: 'Lookout Circular Issued',
-    lastKnownLocation: 'Surat - Varachha Textile Zone',
-    lastDetection: '13 Sep 2026, 10:15 PM (CAM-072)',
-    policeStation: 'Varachha Police Station',
-    city: 'Surat',
-    ageRange: '44-48 yrs',
-    gender: 'Male',
-    height: "5' 7\"",
-    biometricRecordId: 'BIO-GJ-710492',
-    status: 'Requires Verification'
-  },
-  {
-    criminalId: 'CR-18230',
-    name: 'Subject #18230',
-    alias: 'D. Varma',
-    caseId: 'FIR-2026/012-IPC',
-    category: 'Arms Act Violation & Extortion',
-    riskLevel: 'Medium Risk',
-    warrantStatus: 'Bailable Warrant (Summoned)',
-    lastKnownLocation: 'Ahmedabad - Vastrapur',
-    lastDetection: '13 Sep 2026, 09:50 PM (CAM-031)',
-    policeStation: 'Vastrapur Police Station',
-    city: 'Ahmedabad',
-    ageRange: '28-32 yrs',
-    gender: 'Male',
-    height: "5' 11\"",
-    biometricRecordId: 'BIO-GJ-629401',
-    status: 'Under Review'
-  },
-  {
-    criminalId: 'CR-21019',
-    name: 'Subject #21019',
-    alias: 'S. Mansuri',
-    caseId: 'FIR-2026/304-EXP',
-    category: 'Inter-district Burglary',
-    riskLevel: 'High Risk',
-    warrantStatus: 'Arrest Warrant Pending',
-    lastKnownLocation: 'Vadodara - Alkapuri Concourse',
-    lastDetection: '13 Sep 2026, 08:44 PM (CAM-088)',
-    policeStation: 'Sayajigunj Police Station',
-    city: 'Vadodara',
-    ageRange: '38-42 yrs',
-    gender: 'Male',
-    height: "5' 8\"",
-    biometricRecordId: 'BIO-GJ-902319',
-    status: 'Active Pursuit'
-  },
-  {
-    criminalId: 'CR-17655',
-    name: 'Subject #17655',
-    alias: 'V. Jadeja',
-    caseId: 'FIR-2024/902-NDP',
-    category: 'Narcotics Distribution',
-    riskLevel: 'Medium Risk',
-    warrantStatus: 'Court Appearance Pending',
-    lastKnownLocation: 'Rajkot - Bhaktinagar',
-    lastDetection: '13 Sep 2026, 09:22 PM (CAM-112)',
-    policeStation: 'Bhaktinagar Police Station',
-    city: 'Rajkot',
-    ageRange: '30-34 yrs',
-    gender: 'Male',
-    height: "6' 0\"",
-    biometricRecordId: 'BIO-GJ-540918',
-    status: 'Flagged for Intercept'
-  },
-  {
-    criminalId: 'CR-15201',
-    name: 'Subject #15201',
-    alias: 'P. Chudasama',
-    caseId: 'FIR-2025/089-IPC',
-    category: 'Smuggling & Contraband',
-    riskLevel: 'High Risk',
-    warrantStatus: 'Interstate Alert',
-    lastKnownLocation: 'Jamnagar - Bedi Gate Corridor',
-    lastDetection: '12 Sep 2026, 04:10 PM (CAM-142)',
-    policeStation: 'A Division Police Station',
-    city: 'Jamnagar',
-    ageRange: '40-45 yrs',
-    gender: 'Male',
-    height: "5' 10\"",
-    biometricRecordId: 'BIO-GJ-409128',
-    status: 'Under Surveillance'
-  },
-  {
-    criminalId: 'CR-16320',
-    name: 'Subject #16320',
-    alias: 'N. Gohil',
-    caseId: 'FIR-2025/441-TER',
-    category: 'Cyber Fraud Syndicate',
-    riskLevel: 'Low Risk',
-    warrantStatus: 'Interrogated / On Bail',
-    lastKnownLocation: 'Gandhinagar - Sector 6',
-    lastDetection: '13 Sep 2026, 07:15 PM (CAM-120)',
-    policeStation: 'Sector 7 Police Station',
-    city: 'Gandhinagar',
-    ageRange: '26-29 yrs',
-    gender: 'Male',
-    height: "5' 6\"",
-    biometricRecordId: 'BIO-GJ-381029',
-    status: 'Verified False Alarm'
-  },
-  {
-    criminalId: 'CR-22108',
-    name: 'Subject #22108',
-    alias: 'K. Mewada',
-    caseId: 'FIR-2026/512-ROB',
-    category: 'Highway Armed Robbery',
-    riskLevel: 'High Risk',
-    warrantStatus: 'Non-Bailable Warrant',
-    lastKnownLocation: 'Mehsana - Radhanpur Circle',
-    lastDetection: '11 Sep 2026, 11:20 PM (CAM-190)',
-    policeStation: 'B Division Police Station Mehsana',
-    city: 'Mehsana',
-    ageRange: '35-39 yrs',
-    gender: 'Male',
-    height: "5' 8\"",
-    biometricRecordId: 'BIO-GJ-991823',
-    status: 'Wanted'
-  }
-];
+// Criminal Database Records (Dynamic - Populated when targets are registered or scanned)
+export const CRIMINAL_DATABASE = [];
 
-// Security Alerts
-export const SECURITY_ALERTS = [
-  {
-    alertId: 'ALT-8092',
-    type: 'Criminal Match',
-    priority: 'High Priority',
-    priorityLevel: 'high',
-    camera: 'CAM-042',
-    location: 'SG Highway, Ahmedabad',
-    policeStation: 'Sola Police Station',
-    city: 'Ahmedabad',
-    time: '10:42 PM (4m ago)',
-    confidence: '94.8%',
-    description: 'Potential Criminal Match detected: Subject #20841 against active vehicle grand larceny warrant FIR-2026/084-CYB.',
-    status: 'Unacknowledged',
-    targetMatchId: 'MATCH-1024',
-    recommendedAction: 'Dispatch Sector Patrol Unit 14 for visual confirmation.'
-  },
-  {
-    alertId: 'ALT-8089',
-    type: 'Criminal Match',
-    priority: 'High Priority',
-    priorityLevel: 'high',
-    camera: 'CAM-072',
-    location: 'Mini Bazar Diamond Flyover, Surat',
-    policeStation: 'Varachha Police Station',
-    city: 'Surat',
-    time: '10:15 PM (31m ago)',
-    confidence: '92.4%',
-    description: 'Potential Criminal Match detected: Subject #19402 against Lookout Circular FIR-2025/119-ECO.',
-    status: 'Investigating',
-    targetMatchId: 'MATCH-1029',
-    recommendedAction: 'Notify Varachha PS duty officer and monitor adjoining CAM-078.'
-  },
-  {
-    alertId: 'ALT-8084',
-    type: 'Multiple Face Match',
-    priority: 'Medium Priority',
-    priorityLevel: 'medium',
-    camera: 'CAM-038 & CAM-042',
-    location: 'SG Highway Corridor, Ahmedabad',
-    policeStation: 'Sola Police Station',
-    city: 'Ahmedabad',
-    time: '10:35 PM (11m ago)',
-    confidence: '91.2%',
-    description: 'Correlated multi-camera trail sequence detected within 11 minutes across northern expressway corridor.',
-    status: 'Tracking',
-    targetMatchId: 'MATCH-1024',
-    recommendedAction: 'Keep traffic signal intersection checkpoints on alert.'
-  },
-  {
-    alertId: 'ALT-8077',
-    type: 'Camera Warning',
-    priority: 'Medium Priority',
-    priorityLevel: 'medium',
-    camera: 'CAM-054',
-    location: 'SP Ring Road - Bopal Cross Road',
-    policeStation: 'Bopal Police Station',
-    city: 'Ahmedabad',
-    time: '10:02 PM (44m ago)',
-    confidence: 'N/A',
-    description: 'Stream frame drop detected. Feed operating at reduced frame rate (18 fps). Optical lens dust warning.',
-    status: 'Maintenance Notified',
-    targetMatchId: null,
-    recommendedAction: 'Auto-switched to secondary ANPR backup stream.'
-  },
-  {
-    alertId: 'ALT-8068',
-    type: 'Suspicious Detection',
-    priority: 'Low Priority',
-    priorityLevel: 'low',
-    camera: 'CAM-011',
-    location: 'Duffnala Circle - Airport Rd, Ahmedabad',
-    policeStation: 'Shahibaug Police Station',
-    city: 'Ahmedabad',
-    time: '09:30 PM (1h 16m ago)',
-    confidence: '79.1%',
-    description: 'Mask / Facial Occlusion detected during high-density pedestrian interval near VIP transit gate.',
-    status: 'Reviewed',
-    targetMatchId: null,
-    recommendedAction: 'Logged for record. No criminal biometric pattern found.'
-  },
-  {
-    alertId: 'ALT-8060',
-    type: 'System Warning',
-    priority: 'Low Priority',
-    priorityLevel: 'low',
-    camera: 'Gujarat Police Data Center',
-    location: 'Gandhinagar Command Core',
-    policeStation: 'CID Crime Branch',
-    city: 'Gandhinagar',
-    time: '08:00 PM (2h 46m ago)',
-    confidence: '100%',
-    description: 'Scheduled biometric signature index sync completed. 1,248 new state surveillance records merged.',
-    status: 'Resolved',
-    targetMatchId: null,
-    recommendedAction: 'Automated verification check passed.'
-  }
-];
+// Security Alerts (Dynamic - Generated when face matches or incidents occur)
+export const SECURITY_ALERTS = [];
 
-// Live Face Detections Stream (Realtime Feed)
-export const REALTIME_DETECTIONS = [
-  {
-    detectionId: 'DET-1024',
-    timestamp: '10:42:18 PM',
-    camera: 'CAM-042',
-    location: 'SG Highway - Sola Cross Roads',
-    city: 'Ahmedabad',
-    area: 'SG Highway',
-    policeStation: 'Sola Police Station',
-    faceDetected: true,
-    dbMatch: 'Potential Match',
-    matchedCriminalId: 'CR-20841',
-    confidence: 94.8,
-    estimatedAge: '34 ± 3',
-    gender: 'Male',
-    glasses: 'No',
-    mask: 'No',
-    headPose: 'Yaw: +6°, Pitch: -2°',
-    status: 'Criminal Match',
-    riskLevel: 'high'
-  },
-  {
-    detectionId: 'DET-1025',
-    timestamp: '10:41:55 PM',
-    camera: 'CAM-042',
-    location: 'SG Highway - Sola Cross Roads',
-    city: 'Ahmedabad',
-    area: 'SG Highway',
-    policeStation: 'Sola Police Station',
-    faceDetected: true,
-    dbMatch: 'No Match',
-    matchedCriminalId: null,
-    confidence: 12.1,
-    estimatedAge: '28 ± 4',
-    gender: 'Female',
-    glasses: 'Yes',
-    mask: 'No',
-    headPose: 'Yaw: -12°, Pitch: +4°',
-    status: 'No Match',
-    riskLevel: 'normal'
-  },
-  {
-    detectionId: 'DET-1026',
-    timestamp: '10:41:12 PM',
-    camera: 'CAM-021',
-    location: 'Commerce Six Roads Junction',
-    city: 'Ahmedabad',
-    area: 'Navrangpura',
-    policeStation: 'Navrangpura Police Station',
-    faceDetected: true,
-    dbMatch: 'No Match',
-    matchedCriminalId: null,
-    confidence: 18.4,
-    estimatedAge: '45 ± 5',
-    gender: 'Male',
-    glasses: 'No',
-    mask: 'No',
-    headPose: 'Yaw: +2°, Pitch: +1°',
-    status: 'No Match',
-    riskLevel: 'normal'
-  },
-  {
-    detectionId: 'DET-1027',
-    timestamp: '10:39:48 PM',
-    camera: 'CAM-015',
-    location: 'Shivranjani Cross Roads',
-    city: 'Ahmedabad',
-    area: 'Satellite',
-    policeStation: 'Satellite Police Station',
-    faceDetected: true,
-    dbMatch: 'No Match',
-    matchedCriminalId: null,
-    confidence: 22.0,
-    estimatedAge: '22 ± 2',
-    gender: 'Female',
-    glasses: 'No',
-    mask: 'No',
-    headPose: 'Yaw: +18°, Pitch: -4°',
-    status: 'No Match',
-    riskLevel: 'normal'
-  },
-  {
-    detectionId: 'DET-1028',
-    timestamp: '10:38:02 PM',
-    camera: 'CAM-051',
-    location: 'Kankaria Gate No. 3',
-    city: 'Ahmedabad',
-    area: 'Maninagar',
-    policeStation: 'Maninagar Police Station',
-    faceDetected: true,
-    dbMatch: 'No Match',
-    matchedCriminalId: null,
-    confidence: 15.3,
-    estimatedAge: '51 ± 4',
-    gender: 'Male',
-    glasses: 'Yes',
-    mask: 'No',
-    headPose: 'Yaw: -4°, Pitch: +8°',
-    status: 'No Match',
-    riskLevel: 'normal'
-  },
-  {
-    detectionId: 'DET-1029',
-    timestamp: '10:15:30 PM',
-    camera: 'CAM-072',
-    location: 'Mini Bazar Diamond Flyover',
-    city: 'Surat',
-    area: 'Varachha',
-    policeStation: 'Varachha Police Station',
-    faceDetected: true,
-    dbMatch: 'Potential Match',
-    matchedCriminalId: 'CR-19402',
-    confidence: 92.4,
-    estimatedAge: '46 ± 3',
-    gender: 'Male',
-    glasses: 'No',
-    mask: 'No',
-    headPose: 'Yaw: +9°, Pitch: +3°',
-    status: 'Criminal Match',
-    riskLevel: 'high'
-  },
-  {
-    detectionId: 'DET-1030',
-    timestamp: '10:10:04 PM',
-    camera: 'CAM-067',
-    location: 'Gujarat Gas Circle',
-    city: 'Surat',
-    area: 'Adajan',
-    policeStation: 'Adajan Police Station',
-    faceDetected: true,
-    dbMatch: 'No Match',
-    matchedCriminalId: null,
-    confidence: 14.8,
-    estimatedAge: '37 ± 3',
-    gender: 'Male',
-    glasses: 'No',
-    mask: 'No',
-    headPose: 'Yaw: -8°, Pitch: -2°',
-    status: 'No Match',
-    riskLevel: 'normal'
-  },
-  {
-    detectionId: 'DET-1031',
-    timestamp: '09:50:19 PM',
-    camera: 'CAM-031',
-    location: 'IIM Road Junction',
-    city: 'Ahmedabad',
-    area: 'Vastrapur',
-    policeStation: 'Vastrapur Police Station',
-    faceDetected: true,
-    dbMatch: 'Potential Match',
-    matchedCriminalId: 'CR-18230',
-    confidence: 89.6,
-    estimatedAge: '30 ± 3',
-    gender: 'Male',
-    glasses: 'No',
-    mask: 'No',
-    headPose: 'Yaw: +5°, Pitch: +6°',
-    status: 'Criminal Match',
-    riskLevel: 'medium'
-  }
-];
+// Real-time Detections Stream (Dynamic - Generated from live camera face detection)
+export const REALTIME_DETECTIONS = [];
 
 // Reports & Analytics Charts Data
 export const ANALYTICS_DATA = {
   hourlyDetections: [
-    { time: '00:00', detections: 64, matches: 0 },
-    { time: '02:00', detections: 42, matches: 0 },
-    { time: '04:00', detections: 38, matches: 1 },
-    { time: '06:00', detections: 112, matches: 0 },
-    { time: '08:00', detections: 290, matches: 2 },
-    { time: '10:00', detections: 410, matches: 3 },
-    { time: '12:00', detections: 380, matches: 1 },
-    { time: '14:00', detections: 340, matches: 2 },
-    { time: '16:00', detections: 430, matches: 2 },
-    { time: '18:00', detections: 495, matches: 3 },
-    { time: '20:00', detections: 535, matches: 2 },
-    { time: '22:00', detections: 310, matches: 1 }
+    { time: '00:00', detections: 0, matches: 0 },
+    { time: '04:00', detections: 0, matches: 0 },
+    { time: '08:00', detections: 0, matches: 0 },
+    { time: '12:00', detections: 0, matches: 0 },
+    { time: '16:00', detections: 0, matches: 0 },
+    { time: '20:00', detections: 0, matches: 0 }
   ],
-  cityMatches: [
-    { city: 'Ahmedabad', count: 8, totalCameras: 16, activeFeeds: 15, highRisk: 4 },
-    { city: 'Surat', count: 4, totalCameras: 6, activeFeeds: 6, highRisk: 2 },
-    { city: 'Vadodara', count: 3, totalCameras: 5, activeFeeds: 4, highRisk: 1 },
-    { city: 'Rajkot', count: 1, totalCameras: 5, activeFeeds: 5, highRisk: 0 },
-    { city: 'Gandhinagar', count: 1, totalCameras: 5, activeFeeds: 5, highRisk: 0 }
-  ],
-  confidenceDistribution: [
-    { range: '90% - 100%', count: 5, label: 'High Confidence Match', color: '#dc2626' },
-    { range: '80% - 89%', count: 9, label: 'Probable Match (Verify)', color: '#ea580c' },
-    { range: '70% - 79%', count: 14, label: 'Moderate Similarity', color: '#ca8a04' },
-    { range: '< 70%', count: 2818, label: 'Standard Filter Clear', color: '#2563eb' }
-  ],
-  alertsByCategory: [
-    { category: 'Criminal Match', count: 17, share: '38%' },
-    { category: 'Multiple Face Match', count: 9, share: '20%' },
-    { category: 'Camera Signal / Hardware', count: 6, share: '13%' },
-    { category: 'Suspicious Occlusion', count: 8, share: '18%' },
-    { category: 'System Maintenance', count: 5, share: '11%' }
-  ],
+  cityMatches: [],
+  confidenceDistribution: [],
+  alertsByCategory: [],
   kpis: {
-    activeCameras: 128,
-    activeCamerasTrend: '+4.2%',
-    activeCamerasSubtitle: 'Currently Online',
-    facesDetected: '2,846',
+    activeCameras: 50,
+    activeCamerasTrend: '100% Online',
+    activeCamerasSubtitle: '50 Feeds Active Across Gujarat',
+    facesDetected: '0',
     facesDetectedSubtitle: 'Today',
-    criminalMatches: 17,
-    criminalMatchesSubtitle: 'Requires Attention',
-    activeAlerts: 6,
-    activeAlertsSubtitle: 'High Priority'
+    criminalMatches: 0,
+    criminalMatchesSubtitle: 'Awaiting Scans',
+    activeAlerts: 0,
+    activeAlertsSubtitle: 'Normal Surveillance'
   }
 };
 

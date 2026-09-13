@@ -5,7 +5,7 @@ import { Badge } from '../components/common/Badge';
 import { Pagination } from '../components/common/Pagination';
 import { SearchIcon, DatabaseIcon, EyeIcon, FilterIcon, RefreshCwIcon } from '../components/common/Icons';
 
-export function CriminalDatabasePage({ onSelectCriminal }) {
+export function CriminalDatabasePage({ onSelectCriminal, criminals = [], onNavigate }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
@@ -14,14 +14,14 @@ export function CriminalDatabasePage({ onSelectCriminal }) {
   const itemsPerPage = 5;
 
   const filtered = useMemo(() => {
-    return CRIMINAL_DATABASE.filter((crim) => {
+    return criminals.filter((crim) => {
       const matchesSearch =
         searchQuery === '' ||
-        crim.criminalId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        crim.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        crim.alias.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        crim.caseId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        crim.category.toLowerCase().includes(searchQuery.toLowerCase());
+        (crim.criminalId && crim.criminalId.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (crim.name && crim.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (crim.alias && crim.alias.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (crim.caseId && crim.caseId.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (crim.category && crim.category.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesCity = selectedCity === '' || crim.city === selectedCity;
       const matchesStatus = selectedStatus === '' || crim.status === selectedStatus;
@@ -29,7 +29,7 @@ export function CriminalDatabasePage({ onSelectCriminal }) {
 
       return matchesSearch && matchesCity && matchesStatus && matchesRisk;
     });
-  }, [searchQuery, selectedCity, selectedStatus, selectedRisk]);
+  }, [criminals, searchQuery, selectedCity, selectedStatus, selectedRisk]);
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginatedItems = filtered.slice(
@@ -56,7 +56,7 @@ export function CriminalDatabasePage({ onSelectCriminal }) {
                 State Criminal Intelligence Registry
               </h2>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                {CRIMINAL_DATABASE.length} Registered Biometric Profiles
+                {criminals.length} Registered Biometric Profiles
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -188,12 +188,17 @@ export function CriminalDatabasePage({ onSelectCriminal }) {
                     </td>
 
                     <td className="px-3 py-3">
-                      <FacePlaceholder
-                        id={crim.criminalId}
-                        confidence={95.0}
-                        variant="thumbnail"
-                        isMatch={true}
-                      />
+                      {crim.photoUrl || crim.photo ? (
+                        <img
+                          src={crim.photoUrl || crim.photo}
+                          alt={crim.name}
+                          className="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-2xs"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-slate-800 text-amber-400 font-mono text-[10px] flex items-center justify-center font-bold">
+                          BIO
+                        </div>
+                      )}
                     </td>
 
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -234,7 +239,7 @@ export function CriminalDatabasePage({ onSelectCriminal }) {
                     <td className="px-4 py-3 text-right whitespace-nowrap">
                       <button
                         type="button"
-                        onClick={() => alert(`Opening criminal dossier for ${crim.criminalId} (${crim.name})`)}
+                        onClick={() => onSelectCriminal && onSelectCriminal(crim)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition shadow-2xs hover:text-blue-700"
                       >
                         <EyeIcon className="w-3.5 h-3.5 text-slate-400" />
@@ -246,6 +251,27 @@ export function CriminalDatabasePage({ onSelectCriminal }) {
               })}
             </tbody>
           </table>
+
+          {filtered.length === 0 && (
+            <div className="p-12 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
+                <DatabaseIcon className="w-6 h-6" />
+              </div>
+              <h4 className="text-sm font-bold text-slate-800">No Biometric Records Found</h4>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                No registered criminal profiles match the search criteria. Upload or scan a subject photo via 'Find Person' to query the CCTV surveillance network and register biometric records.
+              </p>
+              {onNavigate && (
+                <button
+                  type="button"
+                  onClick={() => onNavigate('dashboard')}
+                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow-xs transition"
+                >
+                  Go to Face Scan / Dashboard
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Pagination */}

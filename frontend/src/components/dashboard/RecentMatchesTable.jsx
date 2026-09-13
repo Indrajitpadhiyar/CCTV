@@ -62,14 +62,29 @@ export function RecentMatchesTable({ matches = [], onSelectMatch, onFilterChange
                     </div>
                   </td>
 
-                  {/* Face Thumbnail */}
+                  {/* Face Thumbnail / CCTV Frame */}
                   <td className="px-3 py-3">
-                    <FacePlaceholder
-                      id={item.matchId}
-                      confidence={item.confidence}
-                      variant="thumbnail"
-                      isMatch={true}
-                    />
+                    <div className="w-14 h-10 rounded-md overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center relative shadow-2xs">
+                      {item.annotatedSnapshot || item.annotated_snapshot ? (
+                        <img
+                          src={item.annotatedSnapshot || item.annotated_snapshot}
+                          alt="CCTV Frame"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={item.snapshotUrl || `http://127.0.0.1:8000/api/camera/${item.cameraCode || 'cam01'}/snapshot`}
+                          alt="Snapshot"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = 'http://127.0.0.1:8000/api/camera/cam01/snapshot';
+                          }}
+                        />
+                      )}
+                      <span className="absolute bottom-0 right-0 bg-black/80 text-[8px] font-mono text-rose-400 px-1 py-0.2 rounded-tl">
+                        {item.camera || 'CAM'}
+                      </span>
+                    </div>
                   </td>
 
                   {/* Database Match */}
@@ -98,31 +113,31 @@ export function RecentMatchesTable({ matches = [], onSelectMatch, onFilterChange
                       </span>
                     </div>
                     <span className="text-[10px] text-slate-400">
-                      Biometric Match
+                      Vector Similarity
                     </span>
                   </td>
 
                   {/* Camera */}
-                  <td className="px-4 py-3 font-mono text-slate-800 whitespace-nowrap font-medium">
-                    <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  <td className="px-4 py-3 font-mono text-slate-700 whitespace-nowrap">
+                    <span className="font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
                       {item.camera}
                     </span>
                   </td>
 
-                  {/* Location & Police Station */}
+                  {/* Location & Station */}
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="font-semibold text-slate-800">
-                      {item.area}, {item.city}
-                    </div>
-                    <div className="text-[11px] text-slate-500">
+                    <div className="font-medium text-slate-900">
                       {item.policeStation}
+                    </div>
+                    <div className="text-[11px] text-slate-400">
+                      {item.area}, {item.city}
                     </div>
                   </td>
 
                   {/* Detected At */}
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="text-slate-800 font-medium">
-                      {item.detectedAt.split(', ')[1]}
+                    <div className="font-medium text-slate-800">
+                      {item.detectedAt}
                     </div>
                     <div className="text-[10px] text-rose-600 font-semibold">
                       {item.detectedAgo}
@@ -164,8 +179,14 @@ export function RecentMatchesTable({ matches = [], onSelectMatch, onFilterChange
       </div>
 
       {matches.length === 0 && (
-        <div className="p-8 text-center text-slate-400 text-xs">
-          No matches found for the currently selected filters.
+        <div className="p-12 text-center flex flex-col items-center justify-center text-xs space-y-2">
+          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+            <ShieldAlertIcon className="w-5 h-5 text-slate-400" />
+          </div>
+          <span className="font-bold text-slate-700 text-sm">No Active Criminal Matches</span>
+          <p className="text-slate-400 max-w-md">
+            Zero active alerts for the current filters. Upload a target photo in the "Find Person by Face" panel on the Dashboard to initiate surveillance scans across active CCTV cameras.
+          </p>
         </div>
       )}
     </div>

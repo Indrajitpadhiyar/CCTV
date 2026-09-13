@@ -13,7 +13,17 @@ export function CameraCard({ camera, onViewCamera, onSelectMatch }) {
         {/* Subtle camera lens glare & grid pattern */}
         <div className="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         
-        {/* Animated CCTV feed scene graphic (Neutral vector street crossroad silhouette) */}
+        {/* Real Live Camera Feed Image / Snapshot */}
+        <img
+          src={camera.snapshot_url || (camera.code ? `http://127.0.0.1:8000/api/camera/${camera.code}/snapshot` : null)}
+          alt={camera.name}
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+
+        {/* Animated CCTV feed scene graphic (Fallback placeholder) */}
         <svg className="absolute inset-0 w-full h-full opacity-35" viewBox="0 0 320 180" preserveAspectRatio="none">
           {/* Horizon & road perspective */}
           <polygon points="0,180 140,80 180,80 320,180" fill="#1e293b" />
@@ -25,21 +35,6 @@ export function CameraCard({ camera, onViewCamera, onSelectMatch }) {
           <rect x="230" y="40" width="35" height="80" fill="#1e293b" />
           <rect x="275" y="25" width="40" height="95" fill="#1e293b" />
         </svg>
-
-        {/* AI Face Detection Bounding Boxes Simulation */}
-        <div className="absolute top-[32%] left-[44%] w-10 h-12 border-2 border-emerald-400 bg-emerald-500/10 rounded-xs pointer-events-none">
-          <span className="absolute -top-4 left-0 bg-emerald-500 text-white text-[8px] font-mono px-1 py-0.2 rounded-xs">
-            Face #1
-          </span>
-        </div>
-
-        {isMatch && (
-          <div className="absolute top-[28%] left-[22%] w-12 h-14 border-2 border-rose-500 bg-rose-500/20 rounded-xs pointer-events-none animate-pulse">
-            <span className="absolute -top-4 left-0 bg-rose-600 text-white text-[8px] font-mono font-bold px-1 py-0.2 rounded-xs flex items-center gap-0.5">
-              <span>CR-MATCH 94.8%</span>
-            </span>
-          </div>
-        )}
 
         {/* CCTV OSD Overlay (Top) */}
         <div className="absolute top-2 left-2 right-2 flex items-center justify-between text-[10px] font-mono text-white/90 drop-shadow-xs">

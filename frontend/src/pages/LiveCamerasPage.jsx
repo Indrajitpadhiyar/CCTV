@@ -2,24 +2,31 @@ import React, { useState } from 'react';
 import { CameraCard } from '../components/dashboard/CameraCard';
 import { VideoIcon, FilterIcon, RefreshCwIcon, MaximizeIcon } from '../components/common/Icons';
 
-export function LiveCamerasPage({ cameras, onViewCamera, onSelectMatch }) {
+export function LiveCamerasPage({ cameras = [], allCameras = [], onViewCamera, onSelectMatch }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [gridCols, setGridCols] = useState(3); // 2, 3, or 4
+  const [showAllChannels, setShowAllChannels] = useState(true);
 
-  const filtered = cameras.filter((cam) => {
+  const activeSource = (showAllChannels && allCameras.length > 0) ? allCameras : (cameras.length > 0 ? cameras : allCameras);
+
+  const filtered = activeSource.filter((cam) => {
     const matchesStatus =
       statusFilter === 'all' ||
       (statusFilter === 'match' && cam.status === 'match') ||
       (statusFilter === 'warning' && cam.status === 'warning') ||
       (statusFilter === 'online' && cam.status === 'online');
 
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      cam.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cam.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cam.station.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cam.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cam.city.toLowerCase().includes(searchQuery.toLowerCase());
+      !q ||
+      (cam.id && cam.id.toLowerCase().includes(q)) ||
+      (cam.code && cam.code.toLowerCase().includes(q)) ||
+      (cam.name && cam.name.toLowerCase().includes(q)) ||
+      (cam.spot && cam.spot.toLowerCase().includes(q)) ||
+      (cam.station && cam.station.toLowerCase().includes(q)) ||
+      (cam.area && cam.area.toLowerCase().includes(q)) ||
+      (cam.city && cam.city.toLowerCase().includes(q));
 
     return matchesStatus && matchesSearch;
   });
@@ -29,9 +36,14 @@ export function LiveCamerasPage({ cameras, onViewCamera, onSelectMatch }) {
       {/* Top Controls Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-slate-900">
-            Live Surveillance Matrix ({filtered.length} Channels)
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-900">
+              Live Surveillance Matrix ({filtered.length} Channels)
+            </h2>
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              {allCameras.length || filtered.length} Backend Cameras Online
+            </span>
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Synchronized multi-camera CCTV feeds from Gujarat State Police grid
           </p>
@@ -41,11 +53,26 @@ export function LiveCamerasPage({ cameras, onViewCamera, onSelectMatch }) {
           {/* Quick Search */}
           <input
             type="text"
-            placeholder="Filter camera by ID or station..."
+            placeholder="Search by cam01, ID, area, station..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 outline-none w-48 sm:w-60 focus:bg-white focus:border-blue-500"
           />
+
+          {/* All Channels vs Filtered Switch */}
+          {allCameras.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowAllChannels(!showAllChannels)}
+              className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition ${
+                showAllChannels
+                  ? 'bg-blue-600 text-white border-blue-700 shadow-2xs'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
+            >
+              {showAllChannels ? `All Cameras (${allCameras.length})` : 'Filtered Only'}
+            </button>
+          )}
 
           {/* Status Filter Buttons */}
           <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden text-xs">

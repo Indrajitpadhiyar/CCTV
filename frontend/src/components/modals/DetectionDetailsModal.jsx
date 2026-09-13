@@ -14,7 +14,7 @@ import {
   ArrowUpRightIcon
 } from '../common/Icons';
 
-export function DetectionDetailsModal({ isOpen, onClose, match, onDispatchUnit }) {
+export function DetectionDetailsModal({ isOpen, onClose, match, onDispatchUnit, onViewCameraFeed }) {
   const [actionNotice, setActionNotice] = useState(null);
 
   if (!match) return null;
@@ -117,18 +117,43 @@ export function DetectionDetailsModal({ isOpen, onClose, match, onDispatchUnit }
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            {/* Left: Detected Face */}
+            {/* Left: Real CCTV Detected Face Frame */}
             <div className="md:col-span-4 flex flex-col items-center">
-              <FacePlaceholder
-                id={match.detectionId}
-                confidence={match.confidence}
-                variant="detected"
-                isMatch={true}
-                className="w-full max-w-[210px]"
-              />
-              <div className="mt-2 text-center text-xs text-slate-500">
-                CCTV Frame Capture ({match.camera})
+              <div className="w-full aspect-video max-w-[280px] rounded-lg overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center relative shadow-sm">
+                {match.annotatedSnapshot || match.annotated_snapshot ? (
+                  <img
+                    src={match.annotatedSnapshot || match.annotated_snapshot}
+                    alt={`CCTV Frame ${match.camera}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={match.snapshotUrl || `http://127.0.0.1:8000/api/camera/${match.cameraCode || 'cam01'}/snapshot`}
+                    alt="Live Camera Snapshot"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = `http://127.0.0.1:8000/api/camera/cam01/snapshot`;
+                    }}
+                  />
+                )}
+                <div className="absolute top-1 left-1 bg-black/75 backdrop-blur-xs text-rose-400 text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                  <span>REC 4K • {match.camera}</span>
+                </div>
               </div>
+              <div className="mt-2 text-center text-xs text-slate-600 font-medium">
+                Actual CCTV Footage Frame ({match.camera})
+              </div>
+              {onViewCameraFeed && (
+                <button
+                  type="button"
+                  onClick={() => onViewCameraFeed(match)}
+                  className="mt-1.5 text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline"
+                >
+                  <VideoIcon className="w-3.5 h-3.5" />
+                  <span>Stream Live Camera Feed</span>
+                </button>
+              )}
             </div>
 
             {/* Center: Comparison Metrics & Match Confidence */}
@@ -185,17 +210,27 @@ export function DetectionDetailsModal({ isOpen, onClose, match, onDispatchUnit }
               </div>
             </div>
 
-            {/* Right: Database Profile */}
+            {/* Right: Database Reference / Uploaded Target Profile */}
             <div className="md:col-span-4 flex flex-col items-center">
-              <FacePlaceholder
-                id={match.criminalId}
-                confidence={match.confidence}
-                variant="database"
-                isMatch={true}
-                className="w-full max-w-[210px]"
-              />
-              <div className="mt-2 text-center text-xs text-slate-500">
-                Database Reference ({match.criminalId})
+              <div className="w-full max-w-[210px] aspect-square rounded-lg overflow-hidden border border-slate-300 bg-slate-100 flex items-center justify-center relative shadow-2xs">
+                {match.photo ? (
+                  <img src={match.photo} alt="Subject Reference" className="w-full h-full object-cover" />
+                ) : (
+                  <img
+                    src="http://127.0.0.1:8000/api/sample-face"
+                    alt="Target Reference Face"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="absolute bottom-1 right-1 bg-slate-900/80 text-white text-[9px] font-mono px-1.5 py-0.5 rounded">
+                  TARGET PROFILE
+                </div>
+              </div>
+              <div className="mt-2 text-center text-xs text-slate-500 font-medium">
+                Target Reference Profile ({match.criminalId || 'ID-REF'})
               </div>
             </div>
           </div>

@@ -34,30 +34,15 @@ export function CameraViewModal({ isOpen, onClose, camera, onSelectMatch }) {
             <div className="absolute h-36 w-px bg-white/40"></div>
           </div>
 
-          {/* Neutral vector street background */}
-          <svg className="absolute inset-0 w-full h-full opacity-40" viewBox="0 0 480 270" preserveAspectRatio="none">
-            <polygon points="0,270 210,120 270,120 480,270" fill="#1e293b" />
-            <line x1="240" y1="120" x2="240" y2="270" stroke="#64748b" strokeWidth="2.5" strokeDasharray="10 8" />
-            <rect x="30" y="50" width="60" height="130" fill="#0f172a" />
-            <rect x="100" y="80" width="50" height="100" fill="#1e293b" />
-            <rect x="340" y="60" width="60" height="120" fill="#0f172a" />
-            <rect x="410" y="40" width="55" height="140" fill="#1e293b" />
-          </svg>
-
-          {/* Simulated detected face bounding boxes */}
-          <div className="absolute top-[38%] left-[46%] w-12 h-14 border-2 border-emerald-400 bg-emerald-500/10 rounded-xs pointer-events-none">
-            <span className="absolute -top-4 left-0 bg-emerald-600 text-white text-[9px] font-mono px-1 py-0.5 rounded-xs">
-              Face #1 Clear
-            </span>
-          </div>
-
-          {camera.status === 'match' && (
-            <div className="absolute top-[32%] left-[24%] w-14 h-16 border-2 border-rose-500 bg-rose-500/20 rounded-xs pointer-events-none animate-pulse">
-              <span className="absolute -top-5 left-0 bg-rose-600 text-white text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-xs">
-                POTENTIAL MATCH 94.8%
-              </span>
-            </div>
-          )}
+          {/* Live Video Stream from Backend */}
+          <img
+            src={camera.stream_url || (camera.code ? `http://127.0.0.1:8000/api/camera/${camera.code}/stream` : `http://127.0.0.1:8000/api/camera/cam04/stream`)}
+            alt={camera.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = camera.snapshot_url || (camera.code ? `http://127.0.0.1:8000/api/camera/${camera.code}/snapshot` : `http://127.0.0.1:8000/api/camera/cam04/snapshot`);
+            }}
+          />
 
           {/* Top OSD Bar */}
           <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-xs font-mono text-white/90 drop-shadow-md">
